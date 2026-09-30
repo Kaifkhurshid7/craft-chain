@@ -1,0 +1,51 @@
+{
+  "name": "craft-chain-blockchain",
+  "version": "1.0.0",
+  "description": "Craft-Chain smart contract layer for ERC-721 batch traceability",
+  "main": "hardhat.config.ts",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:watch": "hardhat test --watch",
+    "test:coverage": "hardhat coverage",
+    "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia",
+    "verify": "hardhat verify",
+    "clean": "hardhat clean",
+    "node": "hardhat node",
+    "accounts": "hardhat accounts"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "solidity",
+    "erc721",
+    "nft",
+    "supply-chain",
+    "traceability"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.6",
+    "@nomicfoundation/hardhat-ethers": "^3.0.5",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.7",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.10.6",
+    "chai": "^4.3.10",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.13.0",
+    "hardhat": "^2.29.1",
+    "hardhat-gas-reporter": "^1.0.10",
+    "solidity-coverage": "^0.8.5",
+    "ts-node": "^10.9.2",
+    "typechain": "^8.3.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0"
+  }
+}
