@@ -210,7 +210,7 @@ export interface WalletContextType {
 export interface ContractContextType {
   isLoading: boolean;
   error: string | null;
-  mintBatch: (to: string, metadataURI: string) => Promise<number | null>;
+  mintBatch: (to: string, metadataURI: string) => Promise<string | null>;
   recordStep: (tokenId: number, stepHash: string) => Promise<string | null>;
   transferBatch: (to: string, tokenId: number) => Promise<string | null>;
   getBatchNFT: (tokenId: number) => Promise<BatchNFT | null>;

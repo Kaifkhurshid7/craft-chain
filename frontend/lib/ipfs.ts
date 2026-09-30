@@ -597,7 +597,7 @@ export async function checkIPFSGateway(): Promise<boolean> {
         cleanupTimeoutAbortController(controller);
       }
     } catch (error) {
-      logDebug(`IPFS gateway ${gateway} check failed`, error);
+      logDebug(`IPFS gateway ${gateway} check failed`, { error });
       continue;
     }
   }
