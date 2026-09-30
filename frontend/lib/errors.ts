@@ -244,7 +244,7 @@ export class TimeoutError extends AppError {
  * Parse blockchain error and convert to AppError
  */
 export function parseBlockchainError(error: unknown): AppError {
-  const err = error as Record<string, unknown>;
+  const err = error as { code?: unknown; reason?: string; message?: string; [key: string]: any };
 
   // Handle ethers.js specific errors
   if (err.code === "ACTION_REJECTED" || err.reason?.includes("rejected")) {
@@ -321,7 +321,7 @@ export function parseBlockchainError(error: unknown): AppError {
  * Parse IPFS error and convert to AppError
  */
 export function parseIPFSError(error: unknown): AppError {
-  const err = error as Record<string, unknown>;
+  const err = error as { code?: unknown; reason?: string; message?: string; [key: string]: any };
   const message = err.message ? String(err.message) : "Unknown IPFS error";
 
   if (message.includes("timeout") || message.includes("timed out")) {
@@ -360,7 +360,7 @@ export function parseIPFSError(error: unknown): AppError {
  * Parse network error and convert to AppError
  */
 export function parseNetworkError(error: unknown): AppError {
-  const err = error as Record<string, unknown>;
+  const err = error as { code?: unknown; reason?: string; message?: string; [key: string]: any };
   const message = err.message ? String(err.message) : "Unknown network error";
 
   if (message.includes("ECONNREFUSED") || message.includes("unreachable")) {
