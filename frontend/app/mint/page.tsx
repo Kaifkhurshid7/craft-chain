@@ -14,11 +14,10 @@ import {
   isValidImageFile,
   validateBatchForm,
   sanitizeString,
-  BatchFormData,
 } from "@/hooks/useFormValidation";
 import { useTransactionStatus } from "@/hooks/useTransactionStatus";
-import { uploadImage, uploadBatchMetadata, createBatchMetadata, formatIPFSError } from "@/lib/ipfs";
-import { getUserMessage, getErrorType, isRecoverableError, getSuggestedAction } from "@/lib/errors";
+import { uploadBatchMetadata, createBatchMetadata } from "@/lib/ipfs";
+import { getUserMessage, getSuggestedAction } from "@/lib/errors";
 import { logError, logDebug } from "@/lib/errorLogger";
 import { MintBatchFormData } from "@/types";
 
@@ -76,7 +75,7 @@ export default function MintPage() {
   const handleRetry = useCallback(async () => {
     if (!lastMetadataURI) {
       // If we don't have metadata URI, retry the whole process
-      handleSubmit(new Event("submit") as any);
+      handleSubmit(new Event("submit") as unknown as React.FormEvent);
       return;
     }
 
