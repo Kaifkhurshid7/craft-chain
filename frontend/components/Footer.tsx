@@ -13,11 +13,20 @@ export function Footer(): JSX.Element {
       <div className="mx-auto max-w-7xl px-5 py-12 md:px-8 lg:px-10">
         <div className="flex flex-col justify-between gap-10 lg:flex-row lg:items-start">
           <div>
-            <Link href="/" className="inline-flex items-center gap-3" aria-label="Craft-Chain home">
-              <span className="grid h-9 w-9 place-items-center rounded-md border border-forest text-forest" aria-hidden="true">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-3"
+              aria-label="Craft-Chain home"
+            >
+              <span
+                className="grid h-9 w-9 place-items-center rounded-md border border-forest text-forest"
+                aria-hidden="true"
+              >
                 <span className="h-3.5 w-3.5 rotate-45 border border-current" />
               </span>
-              <span className="font-serif text-2xl font-bold tracking-[-0.03em]">CRAFT-CHAIN</span>
+              <span className="font-serif text-2xl font-bold tracking-[-0.03em]">
+                CRAFT-CHAIN
+              </span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-6 text-ink/60">
               Transparent provenance for handcrafted goods.
