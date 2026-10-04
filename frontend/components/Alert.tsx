@@ -66,16 +66,15 @@ export function Alert({
       className={`${styles.container} rounded-lg p-4 flex items-start gap-4 ${className}`}
       role="alert"
     >
-      {/* Icon */}
-      <div className={`text-xl flex-shrink-0 ${styles.title}`}>{styles.icon}</div>
+      <div className={`text-xl flex-shrink-0 ${styles.title}`}>
+        {styles.icon}
+      </div>
 
-      {/* Content */}
       <div className="flex-1 min-w-0">
         {title && <h4 className={`font-semibold ${styles.title}`}>{title}</h4>}
         <p className={`text-sm ${styles.message}`}>{message}</p>
       </div>
 
-      {/* Dismiss Button */}
       {dismissible && (
         <button
           onClick={handleDismiss}

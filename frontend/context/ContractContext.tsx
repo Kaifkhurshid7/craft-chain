@@ -19,7 +19,9 @@ import {
 import { getBatchMetadata, getStepData, verifyDataHash } from "@/lib/ipfs";
 import { useWallet } from "./WalletContext";
 
-const ContractContext = createContext<ContractContextType | undefined>(undefined);
+const ContractContext = createContext<ContractContextType | undefined>(
+  undefined
+);
 
 /**
  * Provider component for contract interactions
@@ -46,8 +48,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
         return await mintBatch(to, metadataURI);
       } catch (err: unknown) {
         const contractError = err as { message?: string };
-        const errorMessage =
-          contractError.message || "Failed to mint batch";
+        const errorMessage = contractError.message || "Failed to mint batch";
         setError(errorMessage);
         console.error("Mint batch error:", err);
         return null;
@@ -76,8 +77,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
         return txHash;
       } catch (err: unknown) {
         const contractError = err as { message?: string };
-        const errorMessage =
-          contractError.message || "Failed to record step";
+        const errorMessage = contractError.message || "Failed to record step";
         setError(errorMessage);
         console.error("Record step error:", err);
         return null;
@@ -166,13 +166,11 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
       setError(null);
 
       try {
-        // Get batch NFT data
         const batch = await getBatchNFTData(tokenId);
         if (!batch) {
           return null;
         }
 
-        // Get all steps for the batch
         const onChainSteps = await getBatchSteps(tokenId);
         const completeSteps = [];
 
@@ -217,17 +215,14 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
   /**
    * Check if address can mint
    */
-  const canMint = useCallback(
-    async (address: string): Promise<boolean> => {
-      try {
-        return await checkCanMint(address);
-      } catch (err) {
-        console.error("Error checking mint permission:", err);
-        return false;
-      }
-    },
-    []
-  );
+  const canMint = useCallback(async (address: string): Promise<boolean> => {
+    try {
+      return await checkCanMint(address);
+    } catch (err) {
+      console.error("Error checking mint permission:", err);
+      return false;
+    }
+  }, []);
 
   /**
    * Clear error

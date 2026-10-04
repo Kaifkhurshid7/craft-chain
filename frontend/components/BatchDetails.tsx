@@ -1,1 +1,3 @@
-export default function BatchDetails() { return null; }
+export default function BatchDetails() {
+  return null;
+}

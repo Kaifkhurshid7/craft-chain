@@ -332,7 +332,9 @@ export function getContractConfig(): ContractConfig {
     "https://gateway.pinata.cloud/ipfs/";
 
   if (!contractAddress) {
-    throw new Error("NEXT_PUBLIC_CONTRACT_ADDRESS environment variable is not set");
+    throw new Error(
+      "NEXT_PUBLIC_CONTRACT_ADDRESS environment variable is not set"
+    );
   }
 
   return {

@@ -1,1 +1,3 @@
-export default function StepForm() { return null; }
+export default function StepForm() {
+  return null;
+}

@@ -107,23 +107,23 @@ export function isValidMaterial(material: string): boolean {
 
 export function isValidDate(dateString: string): boolean {
   if (!dateString || typeof dateString !== "string") return false;
-  
+
   const parsedDate = new Date(dateString);
   if (isNaN(parsedDate.getTime())) return false;
-  
+
   // Date must be in the past or today
   const today = new Date();
   today.setHours(23, 59, 59, 999); // End of today
-  
+
   return parsedDate <= today;
 }
 
 export function isValidFutureDate(dateString: string): boolean {
   if (!dateString || typeof dateString !== "string") return false;
-  
+
   const parsedDate = new Date(dateString);
   if (isNaN(parsedDate.getTime())) return false;
-  
+
   // Date must be in the future
   const now = new Date();
   return parsedDate > now;
@@ -131,12 +131,12 @@ export function isValidFutureDate(dateString: string): boolean {
 
 export function isValidDateRange(startDate: string, endDate: string): boolean {
   if (!startDate || !endDate) return false;
-  
+
   const start = new Date(startDate);
   const end = new Date(endDate);
-  
+
   if (isNaN(start.getTime()) || isNaN(end.getTime())) return false;
-  
+
   return start < end;
 }
 
@@ -156,15 +156,18 @@ export function isValidLocation(location: string): boolean {
 
 export function isValidImageFile(file: File | null): boolean {
   if (!file || !(file instanceof File)) return false;
-  
-  // Check file type
-  const validImageTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+  const validImageTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ];
   if (!validImageTypes.includes(file.type)) return false;
-  
-  // Check file size (max 5MB)
+
   const maxSizeInMB = 5;
   if (file.size > maxSizeInMB * 1024 * 1024) return false;
-  
+
   return true;
 }
 
@@ -182,7 +185,7 @@ export function isValidTokenId(tokenId: unknown): boolean {
 
 export function isValidURL(url: string): boolean {
   if (!url || typeof url !== "string") return false;
-  
+
   try {
     new URL(url);
     return true;
@@ -193,31 +196,31 @@ export function isValidURL(url: string): boolean {
 
 export function isValidIPFSURI(uri: string): boolean {
   if (!uri || typeof uri !== "string") return false;
-  
+
   // Check for ipfs:// format
   if (uri.startsWith("ipfs://")) {
     const hash = uri.replace("ipfs://", "");
     // CID must be at least 46 characters (Qm... format)
     return hash.length >= 46 && /^[a-zA-Z0-9]+$/.test(hash);
   }
-  
+
   return false;
 }
 
 export function isValidStepHash(hash: string): boolean {
   if (!hash || typeof hash !== "string") return false;
-  
+
   // Should be a 32-byte hex string with 0x prefix (66 characters total)
   // Or without 0x prefix (64 characters)
   const hexWithPrefix = /^0x[a-fA-F0-9]{64}$/.test(hash);
   const hexWithoutPrefix = /^[a-fA-F0-9]{64}$/.test(hash);
-  
+
   return hexWithPrefix || hexWithoutPrefix;
 }
 
 export function isValidJSON(jsonString: string): boolean {
   if (!jsonString || typeof jsonString !== "string") return false;
-  
+
   try {
     JSON.parse(jsonString);
     return true;
@@ -227,10 +230,15 @@ export function isValidJSON(jsonString: string): boolean {
 }
 
 export function isValidStepType(stepType: string): boolean {
-  const validTypes = ["Processing", "Transportation", "Quality Check", "Packaging", "Other"];
+  const validTypes = [
+    "Processing",
+    "Transportation",
+    "Quality Check",
+    "Packaging",
+    "Other",
+  ];
   return validTypes.includes(stepType);
 }
-
 
 /**
  * Cross-field validation utilities
@@ -264,34 +272,29 @@ export interface TransferFormData {
 export function validateBatchForm(data: BatchFormData): Record<string, string> {
   const errors: Record<string, string> = {};
 
-  // Validate batch name
   if (!isValidBatchName(data.batchName)) {
     errors.batchName = "Batch name must be between 3 and 100 characters.";
   }
 
-  // Validate description
   if (!isValidDescription(data.description)) {
     errors.description = "Description must be between 10 and 500 characters.";
   }
 
-  // Validate origin
   if (!isValidOrigin(data.origin)) {
     errors.origin = "Origin must be between 3 and 100 characters.";
   }
 
-  // Validate material
   if (!isValidMaterial(data.material)) {
     errors.material = "Material must be between 3 and 100 characters.";
   }
 
-  // Validate production date
   if (!isValidDate(data.productionDate)) {
     errors.productionDate = "Production date must be today or in the past.";
   }
 
-  // Validate image
   if (!isValidImageFile(data.image)) {
-    errors.image = "Image must be a valid image file (JPEG, PNG, GIF, WebP) and max 5MB.";
+    errors.image =
+      "Image must be a valid image file (JPEG, PNG, GIF, WebP) and max 5MB.";
   }
 
   return errors;
@@ -303,27 +306,22 @@ export function validateBatchForm(data: BatchFormData): Record<string, string> {
 export function validateStepForm(data: StepFormData): Record<string, string> {
   const errors: Record<string, string> = {};
 
-  // Validate token ID
   if (!isValidTokenId(data.tokenId)) {
     errors.tokenId = "Token ID must be a positive number.";
   }
 
-  // Validate step type
   if (!isValidStepType(data.stepType)) {
     errors.stepType = "Please select a valid step type.";
   }
 
-  // Validate description
   if (!isValidDescription_Step(data.description)) {
     errors.description = "Description must be between 10 and 500 characters.";
   }
 
-  // Validate location
   if (!isValidLocation(data.location)) {
     errors.location = "Location must be between 3 and 200 characters.";
   }
 
-  // Validate date
   if (!isValidDate(data.date)) {
     errors.date = "Date must be today or in the past.";
   }
@@ -334,15 +332,15 @@ export function validateStepForm(data: StepFormData): Record<string, string> {
 /**
  * Validate entire transfer form
  */
-export function validateTransferForm(data: TransferFormData): Record<string, string> {
+export function validateTransferForm(
+  data: TransferFormData
+): Record<string, string> {
   const errors: Record<string, string> = {};
 
-  // Validate token ID
   if (!isValidTokenId(data.tokenId)) {
     errors.tokenId = "Token ID must be a positive number.";
   }
 
-  // Validate recipient address
   if (!isValidEthereumAddress(data.recipientAddress)) {
     errors.recipientAddress = "Please enter a valid Ethereum address.";
   }
@@ -371,18 +369,20 @@ export function normalizeAddress(address: string): string {
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 Bytes";
-  
+
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 }
 
 /**
  * Get minimum password strength (if needed for future features)
  */
-export function getPasswordStrength(password: string): "weak" | "medium" | "strong" {
+export function getPasswordStrength(
+  password: string
+): "weak" | "medium" | "strong" {
   let strength = 0;
 
   if (password.length >= 8) strength++;

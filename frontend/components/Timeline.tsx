@@ -28,11 +28,16 @@ function Shell({ children }: { children: React.ReactNode }): JSX.Element {
   );
 }
 
-export function Timeline({ events, isLoading = false }: TimelineProps): JSX.Element {
+export function Timeline({
+  events,
+  isLoading = false,
+}: TimelineProps): JSX.Element {
   if (isLoading) {
     return (
       <Shell>
-        <p className="px-6 py-10 text-center text-sm text-ink/60">Loading timeline...</p>
+        <p className="px-6 py-10 text-center text-sm text-ink/60">
+          Loading timeline...
+        </p>
       </Shell>
     );
   }
@@ -40,7 +45,9 @@ export function Timeline({ events, isLoading = false }: TimelineProps): JSX.Elem
   if (events.length === 0) {
     return (
       <Shell>
-        <p className="px-6 py-10 text-center text-sm text-ink/60">No events recorded yet</p>
+        <p className="px-6 py-10 text-center text-sm text-ink/60">
+          No events recorded yet
+        </p>
       </Shell>
     );
   }
@@ -58,7 +65,9 @@ export function Timeline({ events, isLoading = false }: TimelineProps): JSX.Elem
             const pill = isStep ? "Step" : "Transfer";
             const verified = isStep && (event.step.hashVerified ?? true);
             const location = isStep ? event.step.stepData?.location : undefined;
-            const description = isStep ? event.step.stepData?.description : undefined;
+            const description = isStep
+              ? event.step.stepData?.description
+              : undefined;
             const actor = isStep ? event.step.actor : undefined;
 
             return (
@@ -71,7 +80,10 @@ export function Timeline({ events, isLoading = false }: TimelineProps): JSX.Elem
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   {!isLast ? (
-                    <span className="mt-3 min-h-16 flex-1 border-l border-forest/15" aria-hidden="true" />
+                    <span
+                      className="mt-3 min-h-16 flex-1 border-l border-forest/15"
+                      aria-hidden="true"
+                    />
                   ) : (
                     <span className="mt-3 h-6" aria-hidden="true" />
                   )}
@@ -91,28 +103,45 @@ export function Timeline({ events, isLoading = false }: TimelineProps): JSX.Elem
 
                   <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                     <div>
-                      <h3 className="font-serif text-2xl font-bold tracking-[-0.02em]">{title}</h3>
+                      <h3 className="font-serif text-2xl font-bold tracking-[-0.02em]">
+                        {title}
+                      </h3>
                       <p className="mt-1 text-sm text-ink/60">
-                        {new Date(event.timestamp * 1000).toLocaleDateString(undefined, {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                        {new Date(event.timestamp * 1000).toLocaleDateString(
+                          undefined,
+                          {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          }
+                        )}
                       </p>
-                      {description && <p className="mt-3 text-sm text-ink/70">{description}</p>}
+                      {description && (
+                        <p className="mt-3 text-sm text-ink/70">
+                          {description}
+                        </p>
+                      )}
                       {location && (
                         <p className="mt-3 inline-flex items-center gap-2 text-sm font-medium">
-                          <MapPin size={15} strokeWidth={1.7} className="text-ink/60" aria-hidden="true" />
+                          <MapPin
+                            size={15}
+                            strokeWidth={1.7}
+                            className="text-ink/60"
+                            aria-hidden="true"
+                          />
                           <span>{location}</span>
                         </p>
                       )}
                       {event.type === "transfer" && (
                         <p className="mt-3 font-mono text-xs text-ink/70">
-                          {formatAddress(event.from)} → {formatAddress(event.to)}
+                          {formatAddress(event.from)} →{" "}
+                          {formatAddress(event.to)}
                         </p>
                       )}
                       {actor && (
-                        <p className="mt-3 font-mono text-xs text-ink/60">By {formatAddress(actor)}</p>
+                        <p className="mt-3 font-mono text-xs text-ink/60">
+                          By {formatAddress(actor)}
+                        </p>
                       )}
                     </div>
 
@@ -124,9 +153,14 @@ export function Timeline({ events, isLoading = false }: TimelineProps): JSX.Elem
                         className="inline-flex items-center gap-1.5 font-mono text-xs text-forest transition-colors hover:text-ink"
                       >
                         <span>
-                          {event.transactionHash.slice(0, 6)}...{event.transactionHash.slice(-4)}
+                          {event.transactionHash.slice(0, 6)}...
+                          {event.transactionHash.slice(-4)}
                         </span>
-                        <ExternalLink size={13} strokeWidth={1.7} aria-hidden="true" />
+                        <ExternalLink
+                          size={13}
+                          strokeWidth={1.7}
+                          aria-hidden="true"
+                        />
                       </a>
                     )}
                   </div>

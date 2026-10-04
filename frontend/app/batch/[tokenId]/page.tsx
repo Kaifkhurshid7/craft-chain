@@ -13,7 +13,11 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Alert } from "@/components/Alert";
 import { useContract } from "@/context/ContractContext";
 import { BatchHistory, DEFAULT_BATCH_METADATA } from "@/types";
-import { formatAddress, getEtherscanAddressUrl, getEtherscanTokenUrl } from "@/lib/contract";
+import {
+  formatAddress,
+  getEtherscanAddressUrl,
+  getEtherscanTokenUrl,
+} from "@/lib/contract";
 import { getImageUrl } from "@/lib/ipfs";
 
 interface BatchDetailsPageProps {
@@ -22,8 +26,10 @@ interface BatchDetailsPageProps {
   };
 }
 
-const CARD = "rounded-lg border border-forest/15 bg-sand shadow-[0_12px_34px_rgba(31,36,33,0.04)]";
-const CARD_TITLE = "font-sans text-[10px] font-bold uppercase tracking-[0.22em] text-ink/60";
+const CARD =
+  "rounded-lg border border-forest/15 bg-sand shadow-[0_12px_34px_rgba(31,36,33,0.04)]";
+const CARD_TITLE =
+  "font-sans text-[10px] font-bold uppercase tracking-[0.22em] text-ink/60";
 const LINK =
   "inline-flex items-center gap-2 text-sm font-bold text-forest transition-colors hover:text-ink";
 const ACTION =
@@ -39,11 +45,16 @@ function Page({ children }: { children: React.ReactNode }): JSX.Element {
   );
 }
 
-function attr(attributes: { trait_type: string; value: string }[] | undefined, trait: string): string {
+function attr(
+  attributes: { trait_type: string; value: string }[] | undefined,
+  trait: string
+): string {
   return attributes?.find((a) => a.trait_type === trait)?.value || "";
 }
 
-export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX.Element {
+export default function BatchDetailsPage({
+  params,
+}: BatchDetailsPageProps): JSX.Element {
   const { getBatchHistory, isLoading } = useContract();
   const [batchHistory, setBatchHistory] = useState<BatchHistory | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +62,9 @@ export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX
 
   const tokenId = parseInt(params.tokenId, 10);
   const baseUrl =
-    typeof window !== "undefined" ? window.location.origin : "https://craft-chain.vercel.app";
+    typeof window !== "undefined"
+      ? window.location.origin
+      : "https://craft-chain.vercel.app";
   const batchUrl = `${baseUrl}/batch/${tokenId}`;
   const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
 
@@ -81,7 +94,12 @@ export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX
     return (
       <Page>
         <main className="mx-auto max-w-4xl px-5 py-16 md:px-8">
-          <Alert type="error" title="Error" message={error} dismissible={false} />
+          <Alert
+            type="error"
+            title="Error"
+            message={error}
+            dismissible={false}
+          />
           <Link href="/explorer" className={`${LINK} mt-6`}>
             Back to explorer
           </Link>
@@ -140,7 +158,9 @@ export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX
 
           <div className="mt-10 flex flex-col justify-between gap-5 border-t border-forest/15 pt-6 md:flex-row md:items-end">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink/60">Current Owner</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink/60">
+                Current Owner
+              </p>
               <div className="mt-2 flex items-center gap-2">
                 <a
                   href={getEtherscanAddressUrl(batchHistory.currentOwner)}
@@ -150,7 +170,10 @@ export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX
                 >
                   {formatAddress(batchHistory.currentOwner)}
                 </a>
-                <CopyButton value={batchHistory.currentOwner} label="Copy current owner address" />
+                <CopyButton
+                  value={batchHistory.currentOwner}
+                  label="Copy current owner address"
+                />
               </div>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -162,10 +185,18 @@ export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX
                   className={ACTION}
                 >
                   <span>View on Etherscan</span>
-                  <ExternalLink size={14} strokeWidth={1.7} aria-hidden="true" />
+                  <ExternalLink
+                    size={14}
+                    strokeWidth={1.7}
+                    aria-hidden="true"
+                  />
                 </a>
               )}
-              <QRCodeDownloadButton value={batchUrl} size={400} fileName={`batch-${tokenId}-qr`} />
+              <QRCodeDownloadButton
+                value={batchUrl}
+                size={400}
+                fileName={`batch-${tokenId}-qr`}
+              />
             </div>
           </div>
         </section>
@@ -210,7 +241,9 @@ export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX
                       <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-ink/60">
                         {item.trait_type}
                       </dt>
-                      <dd className="mt-2 text-base font-medium">{item.value}</dd>
+                      <dd className="mt-2 text-base font-medium">
+                        {item.value}
+                      </dd>
                     </div>
                   ))}
                 </dl>
@@ -221,7 +254,10 @@ export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX
           </div>
 
           <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
-            <section aria-labelledby="qr-heading" className={`${CARD} p-6 md:p-7`}>
+            <section
+              aria-labelledby="qr-heading"
+              className={`${CARD} p-6 md:p-7`}
+            >
               <h2 id="qr-heading" className={CARD_TITLE}>
                 SCAN TO VERIFY PROVENANCE
               </h2>
@@ -232,25 +268,36 @@ export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX
                 {idLabel}
               </p>
               <p className="mx-auto mt-3 max-w-xs text-center text-sm leading-6 text-ink/60">
-                Scan this code to view the public provenance record for this batch.
+                Scan this code to view the public provenance record for this
+                batch.
               </p>
               <p className="mt-7 border-t border-forest/15 pt-5 text-center text-[10px] font-bold uppercase tracking-[0.2em]">
                 CRAFT-CHAIN · SEPOLIA NETWORK
               </p>
             </section>
 
-            <section aria-labelledby="record-heading" className={`${CARD} p-5 md:p-6`}>
+            <section
+              aria-labelledby="record-heading"
+              className={`${CARD} p-5 md:p-6`}
+            >
               <h2 id="record-heading" className={CARD_TITLE}>
                 BLOCKCHAIN RECORD
               </h2>
               <dl className="mt-5 divide-y divide-forest/15">
                 <Row label="Token ID" value={String(tokenId)} />
                 {contractAddress && (
-                  <Row label="Contract" value={formatAddress(contractAddress)} copy={contractAddress} />
+                  <Row
+                    label="Contract"
+                    value={formatAddress(contractAddress)}
+                    copy={contractAddress}
+                  />
                 )}
                 <Row label="Network" value="Ethereum Sepolia" />
                 <Row label="Steps" value={String(batchHistory.steps.length)} />
-                <Row label="Transfers" value={String(batchHistory.transfers.length)} />
+                <Row
+                  label="Transfers"
+                  value={String(batchHistory.transfers.length)}
+                />
               </dl>
               {contractAddress && (
                 <a
@@ -260,19 +307,28 @@ export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX
                   className={`${LINK} mt-5`}
                 >
                   <span>View on Etherscan</span>
-                  <ExternalLink size={15} strokeWidth={1.7} aria-hidden="true" />
+                  <ExternalLink
+                    size={15}
+                    strokeWidth={1.7}
+                    aria-hidden="true"
+                  />
                 </a>
               )}
             </section>
 
             {cid && (
-              <section aria-labelledby="ipfs-heading" className={`${CARD} p-5 md:p-6`}>
+              <section
+                aria-labelledby="ipfs-heading"
+                className={`${CARD} p-5 md:p-6`}
+              >
                 <h2 id="ipfs-heading" className={CARD_TITLE}>
                   IPFS METADATA
                 </h2>
                 <div className="mt-5 flex items-center justify-between gap-4 rounded-md border border-forest/15 bg-paper px-4 py-3">
                   <p className="font-mono text-sm">
-                    {cid.length > 14 ? `${cid.slice(0, 6)}...${cid.slice(-4)}` : cid}
+                    {cid.length > 14
+                      ? `${cid.slice(0, 6)}...${cid.slice(-4)}`
+                      : cid}
                   </p>
                   <CopyButton value={cid} label="Copy IPFS CID" />
                 </div>
@@ -283,7 +339,11 @@ export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX
                   className={`${LINK} mt-5`}
                 >
                   <span>View on IPFS</span>
-                  <ExternalLink size={15} strokeWidth={1.7} aria-hidden="true" />
+                  <ExternalLink
+                    size={15}
+                    strokeWidth={1.7}
+                    aria-hidden="true"
+                  />
                 </a>
                 <p className="mt-4 text-sm leading-6 text-ink/60">
                   Metadata stored on IPFS, hash recorded on-chain.
@@ -297,10 +357,20 @@ export default function BatchDetailsPage({ params }: BatchDetailsPageProps): JSX
   );
 }
 
-function Row({ label, value, copy }: { label: string; value: string; copy?: string }): JSX.Element {
+function Row({
+  label,
+  value,
+  copy,
+}: {
+  label: string;
+  value: string;
+  copy?: string;
+}): JSX.Element {
   return (
     <div className="flex items-center justify-between gap-4 py-3">
-      <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/60">{label}</dt>
+      <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/60">
+        {label}
+      </dt>
       <dd className="flex items-center gap-2 text-right font-mono text-sm">
         <span>{value}</span>
         {copy && <CopyButton value={copy} label={`Copy ${label}`} />}

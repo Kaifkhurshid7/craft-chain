@@ -12,7 +12,10 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { ProvenanceTimeline, ProvenanceEvent } from "@/components/ProvenanceTimeline";
+import {
+  ProvenanceTimeline,
+  ProvenanceEvent,
+} from "@/components/ProvenanceTimeline";
 
 const heroEvents: ProvenanceEvent[] = [
   {
@@ -54,11 +57,36 @@ const stats = [
 ];
 
 const steps = [
-  { n: "01", title: "Mint", text: "Create a unique batch identity.", Icon: Fingerprint },
-  { n: "02", title: "Document", text: "Preserve the story behind the work.", Icon: ClipboardPenLine },
-  { n: "03", title: "Record", text: "Anchor evidence to blockchain and IPFS.", Icon: Blocks },
-  { n: "04", title: "Transfer", text: "Trace custody at every handoff.", Icon: Truck },
-  { n: "05", title: "Verify", text: "Let anyone confirm what is true.", Icon: FileCheck2 },
+  {
+    n: "01",
+    title: "Mint",
+    text: "Create a unique batch identity.",
+    Icon: Fingerprint,
+  },
+  {
+    n: "02",
+    title: "Document",
+    text: "Preserve the story behind the work.",
+    Icon: ClipboardPenLine,
+  },
+  {
+    n: "03",
+    title: "Record",
+    text: "Anchor evidence to blockchain and IPFS.",
+    Icon: Blocks,
+  },
+  {
+    n: "04",
+    title: "Transfer",
+    text: "Trace custody at every handoff.",
+    Icon: Truck,
+  },
+  {
+    n: "05",
+    title: "Verify",
+    text: "Let anyone confirm what is true.",
+    Icon: FileCheck2,
+  },
 ];
 
 export default function HomePage() {
@@ -78,8 +106,8 @@ export default function HomePage() {
               <em className="font-normal text-forest">Make it verifiable.</em>
             </h1>
             <p className="mt-9 max-w-xl text-base leading-8 text-ink/65 md:text-lg">
-              Craft-Chain records the provenance and custody of handcrafted product batches
-              using blockchain and IPFS.
+              Craft-Chain records the provenance and custody of handcrafted
+              product batches using blockchain and IPFS.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Link href="/mint" className="btn-primary">
@@ -92,7 +120,11 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="mt-14 flex items-center gap-3 text-xs text-ink/50">
-              <ShieldCheck size={17} className="text-forest" strokeWidth={1.5} />
+              <ShieldCheck
+                size={17}
+                className="text-forest"
+                strokeWidth={1.5}
+              />
               <span>Immutable records. Human stories.</span>
             </div>
           </div>
@@ -101,7 +133,9 @@ export default function HomePage() {
             <div className="mb-2 flex items-center justify-between border-b border-forest/10 pb-5">
               <div>
                 <p className="eyebrow tracking-[0.24em]">Live record</p>
-                <h2 className="mt-2 font-serif text-2xl font-semibold">Batch #CC-0428</h2>
+                <h2 className="mt-2 font-serif text-2xl font-semibold">
+                  Batch #CC-0428
+                </h2>
               </div>
               <div
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-forest/20 text-forest"
@@ -119,7 +153,9 @@ export default function HomePage() {
             </div>
             <div className="flex items-center justify-between border-t border-forest/10 pt-4 text-[10px] uppercase tracking-[0.16em] text-ink/45">
               <span>3 verified steps</span>
-              <span className="font-mono normal-case tracking-normal text-forest">0x8f4e...abcd</span>
+              <span className="font-mono normal-case tracking-normal text-forest">
+                0x8f4e...abcd
+              </span>
             </div>
           </div>
         </section>
@@ -134,7 +170,9 @@ export default function HomePage() {
               <div
                 key={s.label}
                 className={`px-4 md:px-8 ${i === 0 ? "pl-0 md:pl-0" : ""} ${
-                  i < stats.length - 1 ? "border-forest/10 max-md:odd:border-r md:border-r" : ""
+                  i < stats.length - 1
+                    ? "border-forest/10 max-md:odd:border-r md:border-r"
+                    : ""
                 }`}
               >
                 <p className="font-serif text-3xl md:text-4xl">{s.value}</p>
@@ -147,7 +185,10 @@ export default function HomePage() {
         </section>
 
         {/* Method */}
-        <section id="process" className="mx-auto max-w-7xl px-6 py-24 md:px-12 md:py-32 lg:px-16">
+        <section
+          id="process"
+          className="mx-auto max-w-7xl px-6 py-24 md:px-12 md:py-32 lg:px-16"
+        >
           <div className="grid gap-14 lg:grid-cols-[0.62fr_1.38fr] lg:gap-24">
             <div>
               <p className="eyebrow mb-5">The method / 02</p>
@@ -155,16 +196,21 @@ export default function HomePage() {
                 A clearer chain from hand to home.
               </h2>
               <p className="mt-6 max-w-sm text-sm leading-7 text-ink/60">
-                One considered record for every meaningful moment. Craft-Chain gives makers
-                and collectors a shared language for trust.
+                One considered record for every meaningful moment. Craft-Chain
+                gives makers and collectors a shared language for trust.
               </p>
             </div>
             <ol className="grid grid-cols-1 divide-y divide-forest/10 border-y border-forest/10">
               {steps.map(({ n, title, text, Icon }) => (
-                <li key={n} className="grid grid-cols-[52px_1fr_auto] items-center gap-5 py-6">
+                <li
+                  key={n}
+                  className="grid grid-cols-[52px_1fr_auto] items-center gap-5 py-6"
+                >
                   <span className="font-mono text-xs text-brass">{n}</span>
                   <div>
-                    <h3 className="font-serif text-xl font-semibold">{title}</h3>
+                    <h3 className="font-serif text-xl font-semibold">
+                      {title}
+                    </h3>
                     <p className="mt-1 text-sm text-ink/55">{text}</p>
                   </div>
                   <Icon size={22} className="text-forest" strokeWidth={1.3} />

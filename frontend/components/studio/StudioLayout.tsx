@@ -22,15 +22,21 @@ export function StudioLayout({ children }: { children: React.ReactNode }) {
             <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.28em] text-forest">
               Craft-chain / studio
             </p>
-            <h1 className="text-5xl leading-[0.98] md:text-7xl">Provenance Studio</h1>
+            <h1 className="text-5xl leading-[0.98] md:text-7xl">
+              Provenance Studio
+            </h1>
             <p className="mt-6 max-w-xl text-base leading-7 text-ink/60 md:text-lg">
-              Create a digital record for a new craft batch, or add the next verified moment in an
-              existing journey.
+              Create a digital record for a new craft batch, or add the next
+              verified moment in an existing journey.
             </p>
           </div>
 
           <div className="mt-16 border-b border-forest/15">
-            <div className="flex flex-wrap gap-8 md:gap-12" role="tablist" aria-label="Studio actions">
+            <div
+              className="flex flex-wrap gap-8 md:gap-12"
+              role="tablist"
+              aria-label="Studio actions"
+            >
               {TABS.map((tab) => {
                 const active = pathname === tab.href;
                 return (
@@ -44,7 +50,9 @@ export function StudioLayout({ children }: { children: React.ReactNode }) {
                     }`}
                   >
                     {tab.label}
-                    {active && <span className="absolute bottom-[-1px] left-0 h-0.5 w-full bg-forest" />}
+                    {active && (
+                      <span className="absolute bottom-[-1px] left-0 h-0.5 w-full bg-forest" />
+                    )}
                   </Link>
                 );
               })}
@@ -60,7 +68,11 @@ export function StudioLayout({ children }: { children: React.ReactNode }) {
 }
 
 export function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-ink/60">{children}</span>;
+  return (
+    <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-ink/60">
+      {children}
+    </span>
+  );
 }
 
 export function FieldError({ message }: { message?: string }) {

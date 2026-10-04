@@ -1,9 +1,27 @@
-import { Check, CheckCircle2, Circle, Clock3, ArrowUpRight, WalletCards } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  Circle,
+  Clock3,
+  ArrowUpRight,
+  WalletCards,
+} from "lucide-react";
 import Link from "next/link";
 
-export const PHASES = ["Preparing", "Waiting for Wallet", "Confirming", "Success"] as const;
+export const PHASES = [
+  "Preparing",
+  "Waiting for Wallet",
+  "Confirming",
+  "Success",
+] as const;
 
-export function TransactionPanel({ phase, failed }: { phase: number; failed?: boolean }): JSX.Element {
+export function TransactionPanel({
+  phase,
+  failed,
+}: {
+  phase: number;
+  failed?: boolean;
+}): JSX.Element {
   return (
     <div className="border border-forest/15 p-6 md:p-7">
       <div className="mb-6 flex items-center gap-3">
@@ -18,13 +36,27 @@ export function TransactionPanel({ phase, failed }: { phase: number; failed?: bo
             <li
               key={name}
               className={`flex items-center gap-3 text-sm ${
-                current ? (failed ? "font-semibold text-danger" : "font-semibold text-forest") : complete ? "text-ink" : "text-ink/40"
+                current
+                  ? failed
+                    ? "font-semibold text-danger"
+                    : "font-semibold text-forest"
+                  : complete
+                    ? "text-ink"
+                    : "text-ink/40"
               }`}
             >
-              {complete ? <CheckCircle2 size={16} /> : current ? <Clock3 size={16} /> : <Circle size={16} />}
+              {complete ? (
+                <CheckCircle2 size={16} />
+              ) : current ? (
+                <Clock3 size={16} />
+              ) : (
+                <Circle size={16} />
+              )}
               <span>{name}</span>
               {current && (
-                <span className="ml-auto text-[10px] uppercase tracking-widest">{failed ? "Failed" : "Current"}</span>
+                <span className="ml-auto text-[10px] uppercase tracking-widest">
+                  {failed ? "Failed" : "Current"}
+                </span>
               )}
             </li>
           );
@@ -53,7 +85,9 @@ export function SuccessCard({
         {rows.map((r) => (
           <div key={r.label} className="flex justify-between gap-4">
             <dt className="text-ink/60">{r.label}</dt>
-            <dd className="break-all text-right font-mono text-xs">{r.value}</dd>
+            <dd className="break-all text-right font-mono text-xs">
+              {r.value}
+            </dd>
           </div>
         ))}
       </dl>

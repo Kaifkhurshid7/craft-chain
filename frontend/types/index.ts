@@ -39,7 +39,8 @@ export interface BatchNFT {
  * Stored on IPFS with hash recorded on-chain
  */
 export interface StepData {
-  stepType: "Processing" | "Transportation" | "Quality Check" | "Packaging" | "Other";
+  stepType:
+    "Processing" | "Transportation" | "Quality Check" | "Packaging" | "Other";
   description: string;
   location: string;
   date: string; // ISO 8601 format
@@ -153,7 +154,8 @@ export interface MintBatchFormData {
  */
 export interface RecordStepFormData {
   tokenId: number;
-  stepType: "Processing" | "Transportation" | "Quality Check" | "Packaging" | "Other";
+  stepType:
+    "Processing" | "Transportation" | "Quality Check" | "Packaging" | "Other";
   description: string;
   location: string;
   date: string; // ISO 8601
@@ -182,7 +184,8 @@ export interface ApiError {
 /**
  * User role in the system
  */
-export type UserRole = "admin" | "artisan" | "distributor" | "retailer" | "buyer" | "unknown";
+export type UserRole =
+  "admin" | "artisan" | "distributor" | "retailer" | "buyer" | "unknown";
 
 /**
  * Contract configuration

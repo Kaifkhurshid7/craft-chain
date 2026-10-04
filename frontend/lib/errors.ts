@@ -59,16 +59,15 @@ export class AppError extends Error {
  * Validation error
  */
 export class ValidationError extends AppError {
-  constructor(message: string, userMessage: string, options?: { field?: string }) {
-    super(
-      ErrorType.VALIDATION_ERROR,
-      message,
-      userMessage,
-      {
-        recoverable: true,
-        details: options?.field ? { field: options.field } : undefined,
-      }
-    );
+  constructor(
+    message: string,
+    userMessage: string,
+    options?: { field?: string }
+  ) {
+    super(ErrorType.VALIDATION_ERROR, message, userMessage, {
+      recoverable: true,
+      details: options?.field ? { field: options.field } : undefined,
+    });
     Object.setPrototypeOf(this, ValidationError.prototype);
   }
 }
@@ -81,7 +80,8 @@ export class NetworkError extends AppError {
     super(
       ErrorType.NETWORK_ERROR,
       message,
-      userMessage || "Network error occurred. Please check your internet connection.",
+      userMessage ||
+        "Network error occurred. Please check your internet connection.",
       {
         recoverable: true,
         suggestedAction: "Check your internet connection and try again.",
@@ -113,11 +113,16 @@ export class ContractError extends AppError {
  * IPFS error
  */
 export class IPFSError extends AppError {
-  constructor(message: string, userMessage?: string, options?: { code?: string }) {
+  constructor(
+    message: string,
+    userMessage?: string,
+    options?: { code?: string }
+  ) {
     super(
       ErrorType.IPFS_ERROR,
       message,
-      userMessage || "Failed to upload or retrieve data from IPFS. Please try again.",
+      userMessage ||
+        "Failed to upload or retrieve data from IPFS. Please try again.",
       {
         code: options?.code,
         recoverable: true,
@@ -141,7 +146,8 @@ export class TransactionError extends AppError {
       code: options?.code,
       recoverable: options?.recoverable ?? true,
       suggestedAction:
-        options?.suggestedAction || "Please verify your transaction details and try again.",
+        options?.suggestedAction ||
+        "Please verify your transaction details and try again.",
     });
     Object.setPrototypeOf(this, TransactionError.prototype);
   }
@@ -169,14 +175,19 @@ export class WalletError extends AppError {
  * Gas estimation error
  */
 export class GasError extends AppError {
-  constructor(message: string, userMessage?: string, options?: { recoverable?: boolean }) {
+  constructor(
+    message: string,
+    userMessage?: string,
+    options?: { recoverable?: boolean }
+  ) {
     super(
       ErrorType.GAS_ERROR,
       message,
       userMessage || "Insufficient gas or gas estimation failed.",
       {
         recoverable: options?.recoverable ?? true,
-        suggestedAction: "Ensure you have enough ETH for gas fees and try again.",
+        suggestedAction:
+          "Ensure you have enough ETH for gas fees and try again.",
       }
     );
     Object.setPrototypeOf(this, GasError.prototype);
@@ -244,9 +255,13 @@ export class TimeoutError extends AppError {
  * Parse blockchain error and convert to AppError
  */
 export function parseBlockchainError(error: unknown): AppError {
-  const err = error as { code?: unknown; reason?: string; message?: string; [key: string]: unknown };
+  const err = error as {
+    code?: unknown;
+    reason?: string;
+    message?: string;
+    [key: string]: unknown;
+  };
 
-  // Handle ethers.js specific errors
   if (err.code === "ACTION_REJECTED" || err.reason?.includes("rejected")) {
     return new TransactionError(
       "User rejected transaction",
@@ -255,7 +270,10 @@ export function parseBlockchainError(error: unknown): AppError {
     );
   }
 
-  if (err.code === "INSUFFICIENT_FUNDS" || err.reason?.includes("insufficient")) {
+  if (
+    err.code === "INSUFFICIENT_FUNDS" ||
+    err.reason?.includes("insufficient")
+  ) {
     return new GasError(
       "Insufficient funds for gas",
       "You don't have enough ETH to pay for this transaction.",
@@ -270,7 +288,10 @@ export function parseBlockchainError(error: unknown): AppError {
     );
   }
 
-  if (err.reason?.includes("unauthorized") || err.reason?.includes("AccessControl")) {
+  if (
+    err.reason?.includes("unauthorized") ||
+    err.reason?.includes("AccessControl")
+  ) {
     return new PermissionError(
       "Not authorized to perform this action",
       "Only authorized addresses can perform this action."
@@ -307,7 +328,6 @@ export function parseBlockchainError(error: unknown): AppError {
     );
   }
 
-  // Generic error
   const message = err.message ? String(err.message) : "Unknown error";
   return new AppError(
     ErrorType.UNKNOWN_ERROR,
@@ -321,7 +341,12 @@ export function parseBlockchainError(error: unknown): AppError {
  * Parse IPFS error and convert to AppError
  */
 export function parseIPFSError(error: unknown): AppError {
-  const err = error as { code?: unknown; reason?: string; message?: string; [key: string]: unknown };
+  const err = error as {
+    code?: unknown;
+    reason?: string;
+    message?: string;
+    [key: string]: unknown;
+  };
   const message = err.message ? String(err.message) : "Unknown IPFS error";
 
   if (message.includes("timeout") || message.includes("timed out")) {
@@ -353,14 +378,22 @@ export function parseIPFSError(error: unknown): AppError {
     );
   }
 
-  return new IPFSError(message, "Failed to process IPFS operation. Please try again.");
+  return new IPFSError(
+    message,
+    "Failed to process IPFS operation. Please try again."
+  );
 }
 
 /**
  * Parse network error and convert to AppError
  */
 export function parseNetworkError(error: unknown): AppError {
-  const err = error as { code?: unknown; reason?: string; message?: string; [key: string]: unknown };
+  const err = error as {
+    code?: unknown;
+    reason?: string;
+    message?: string;
+    [key: string]: unknown;
+  };
   const message = err.message ? String(err.message) : "Unknown network error";
 
   if (message.includes("ECONNREFUSED") || message.includes("unreachable")) {

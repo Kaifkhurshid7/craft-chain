@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
-export function CopyButton({ value, label }: { value: string; label: string }): JSX.Element {
+export function CopyButton({
+  value,
+  label,
+}: {
+  value: string;
+  label: string;
+}): JSX.Element {
   const [copied, setCopied] = useState(false);
 
   const copy = async (): Promise<void> => {
@@ -23,7 +29,11 @@ export function CopyButton({ value, label }: { value: string; label: string }): 
       aria-label={label}
       className="rounded-full border border-forest/15 p-2 text-forest transition-colors hover:border-forest"
     >
-      {copied ? <Check size={14} strokeWidth={1.8} /> : <Copy size={14} strokeWidth={1.7} />}
+      {copied ? (
+        <Check size={14} strokeWidth={1.8} />
+      ) : (
+        <Copy size={14} strokeWidth={1.7} />
+      )}
     </button>
   );
 }
