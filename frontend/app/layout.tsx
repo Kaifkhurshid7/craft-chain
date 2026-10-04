@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
 import { Providers } from "@/context/Providers";
 import "@/styles/globals.css";
 
@@ -33,18 +34,22 @@ export const metadata: Metadata = {
   },
 };
 
+const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif" });
+const sans = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`}>
       <head>
         <meta charSet="utf-8" />
-        <meta name="theme-color" content="#3B82F6" />
+        <meta name="theme-color" content="#F7F4EE" />
       </head>
-      <body className="bg-light text-dark">
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>
