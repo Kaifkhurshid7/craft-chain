@@ -2,8 +2,15 @@
 
 import { useState } from "react";
 import { ArrowUpRight, ChevronDown, MapPin } from "lucide-react";
-import { StudioLayout, FieldLabel, FieldError } from "@/components/studio/StudioLayout";
-import { TransactionPanel, SuccessCard } from "@/components/studio/TransactionPanel";
+import {
+  StudioLayout,
+  FieldLabel,
+  FieldError,
+} from "@/components/studio/StudioLayout";
+import {
+  TransactionPanel,
+  SuccessCard,
+} from "@/components/studio/TransactionPanel";
 import { WalletConnect } from "@/components/WalletConnect";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Alert } from "@/components/Alert";
@@ -19,7 +26,14 @@ export default function RecordStepPage() {
   const { wallet } = useWallet();
   const { recordStep, isLoading: contractLoading } = useContract();
   const { errors, addError, removeError, clearErrors } = useFormValidation();
-  const { status, result, setLoading, setSuccess, setError: setTxError, reset } = useTransactionStatus();
+  const {
+    status,
+    result,
+    setLoading,
+    setSuccess,
+    setError: setTxError,
+    reset,
+  } = useTransactionStatus();
 
   const [formData, setFormData] = useState<RecordStepFormData>({
     tokenId: 0,
@@ -29,7 +43,11 @@ export default function RecordStepPage() {
     date: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -72,7 +90,6 @@ export default function RecordStepPage() {
     setLoading();
 
     try {
-      // Upload step data to IPFS
       await uploadStepData({
         stepType: formData.stepType as StepData["stepType"],
         description: formData.description,
@@ -80,7 +97,6 @@ export default function RecordStepPage() {
         date: formData.date,
       });
 
-      // Calculate hash
       const stepHash = hashStepData({
         stepType: formData.stepType,
         description: formData.description,
@@ -88,7 +104,6 @@ export default function RecordStepPage() {
         date: formData.date,
       });
 
-      // Record on-chain
       const txHash = await recordStep(formData.tokenId, stepHash);
 
       if (txHash) {
@@ -129,7 +144,11 @@ export default function RecordStepPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-8" aria-label="Record a journey step">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-8"
+              aria-label="Record a journey step"
+            >
               <div className="grid gap-8 md:grid-cols-2">
                 <div>
                   <FieldLabel>Token ID</FieldLabel>
@@ -160,7 +179,10 @@ export default function RecordStepPage() {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown size={17} className="pointer-events-none absolute right-0 top-4 text-forest" />
+                    <ChevronDown
+                      size={17}
+                      className="pointer-events-none absolute right-0 top-4 text-forest"
+                    />
                   </div>
                 </div>
 
@@ -180,7 +202,10 @@ export default function RecordStepPage() {
                 <div>
                   <FieldLabel>Location</FieldLabel>
                   <div className="relative">
-                    <MapPin size={16} className="pointer-events-none absolute left-0 top-4 text-forest" />
+                    <MapPin
+                      size={16}
+                      className="pointer-events-none absolute left-0 top-4 text-forest"
+                    />
                     <input
                       type="text"
                       name="location"
