@@ -1,1 +1,3 @@
-export default function MintForm() { return null; }
+export default function MintForm() {
+  return null;
+}

@@ -48,7 +48,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`}>
+    <html
+      lang="en"
+      className={`${serif.variable} ${sans.variable} ${mono.variable}`}
+    >
       <head>
         <meta charSet="utf-8" />
         <meta name="theme-color" content="#F7F4EE" />
