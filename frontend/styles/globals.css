@@ -64,3 +64,13 @@
 .text-muted {
   @apply text-ink/60;
 }
+
+@layer components {
+  .field {
+    @apply border-0 border-b border-forest/20 bg-transparent px-0 py-3 text-base placeholder:text-ink/40 focus:border-forest;
+  }
+
+  .field-error {
+    @apply border-danger;
+  }
+}
