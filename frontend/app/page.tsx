@@ -1,268 +1,201 @@
-"use client";
-
-import { useWallet } from "@/context/WalletContext";
 import Link from "next/link";
+import {
+  ArrowRight,
+  Blocks,
+  CheckCircle2,
+  ClipboardPenLine,
+  FileCheck2,
+  Fingerprint,
+  ShieldCheck,
+  Sparkles,
+  Truck,
+} from "lucide-react";
+import { Footer } from "@/components/Footer";
+import { Navbar } from "@/components/Navbar";
+import { ProvenanceTimeline, ProvenanceEvent } from "@/components/ProvenanceTimeline";
 
-export default function Dashboard() {
-  const { wallet, connect, isLoading, error, clearError } = useWallet();
+const heroEvents: ProvenanceEvent[] = [
+  {
+    id: "artisan",
+    type: "Artisan",
+    actor: "Ama Mensah",
+    location: "Kumasi, Ghana",
+    date: "03 APR 2024",
+    description: "Origin recorded · Handwoven raffia basket",
+    txHash: "0x8f4e7b91a2c3d4e5f60123456789abcd",
+    status: "completed",
+  },
+  {
+    id: "co-op",
+    type: "Co-op",
+    actor: "Kente Collective",
+    location: "Accra, Ghana",
+    date: "09 APR 2024",
+    description: "Quality inspection and custody transfer",
+    txHash: "0x44b1c7de3098f11a23567789abcd0123",
+    status: "completed",
+  },
+  {
+    id: "retailer",
+    type: "Retailer",
+    actor: "Hearth & Hand",
+    location: "London, UK",
+    date: "22 APR 2024",
+    description: "Received and verified for sale",
+    status: "current",
+  },
+];
 
+const stats = [
+  { value: "1,284", label: "Batches Registered" },
+  { value: "8,691", label: "Verified Steps" },
+  { value: "342", label: "Active Records" },
+  { value: "Sepolia", label: "Network" },
+];
+
+const steps = [
+  { n: "01", title: "Mint", text: "Create a unique batch identity.", Icon: Fingerprint },
+  { n: "02", title: "Document", text: "Preserve the story behind the work.", Icon: ClipboardPenLine },
+  { n: "03", title: "Record", text: "Anchor evidence to blockchain and IPFS.", Icon: Blocks },
+  { n: "04", title: "Transfer", text: "Trace custody at every handoff.", Icon: Truck },
+  { n: "05", title: "Verify", text: "Let anyone confirm what is true.", Icon: FileCheck2 },
+];
+
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="container py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-primary">Craft-Chain</h1>
-              <p className="text-sm text-muted mt-1">
-                Blockchain-Based Craft Batch Traceability
-              </p>
+    <div className="min-h-screen bg-paper text-ink">
+      <Navbar />
+      <main>
+        {/* Hero */}
+        <section className="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-6 pb-24 pt-20 md:px-12 md:pt-28 lg:grid-cols-[minmax(0,0.92fr)_minmax(420px,0.8fr)] lg:items-center lg:gap-20 lg:px-16 lg:pb-32">
+          <div>
+            <div className="eyebrow mb-8 flex items-center gap-3 tracking-[0.28em]">
+              <span className="h-px w-8 bg-brass" />
+              <span>Digital provenance / 01</span>
             </div>
-            <div className="flex items-center gap-4">
-              {wallet.isConnected ? (
-                <div className="text-right">
-                  <p className="text-sm font-semibold">
-                    {wallet.address?.slice(0, 6)}...{wallet.address?.slice(-4)}
-                  </p>
-                  <p
-                    className={`text-xs ${
-                      wallet.isCorrectNetwork
-                        ? "text-success"
-                        : "text-warning"
-                    }`}
-                  >
-                    {wallet.isCorrectNetwork
-                      ? "Sepolia Connected"
-                      : "Wrong Network"}
-                  </p>
-                </div>
-              ) : null}
-              <button
-                onClick={connect}
-                disabled={isLoading}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition"
-              >
-                {isLoading ? "Connecting..." : "Connect Wallet"}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Error Alert */}
-      {error && (
-        <div className="container mt-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex justify-between items-center">
-            <p className="text-red-800">{error}</p>
-            <button
-              onClick={clearError}
-              className="text-red-600 hover:text-red-800"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Main Content */}
-      <main className="container py-12">
-        {/* Hero Section */}
-        <section className="mb-12">
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold mb-4">
-              Welcome to Craft-Chain
-            </h2>
-            <p className="text-lg text-muted mb-4">
-              Transparent and verifiable supply chain traceability for
-              handcrafted products using blockchain technology.
+            <h1 className="max-w-3xl font-serif text-5xl font-semibold leading-[0.98] tracking-[-0.045em] sm:text-6xl md:text-7xl lg:text-[5.5rem]">
+              Every craft has a journey.{" "}
+              <em className="font-normal text-forest">Make it verifiable.</em>
+            </h1>
+            <p className="mt-9 max-w-xl text-base leading-8 text-ink/65 md:text-lg">
+              Craft-Chain records the provenance and custody of handcrafted product batches
+              using blockchain and IPFS.
             </p>
-            <p className="text-muted mb-6">
-              Each product batch is represented by a unique ERC-721 NFT on the
-              Ethereum Sepolia testnet. Track custody changes, record
-              processing steps, and verify complete batch history with
-              cryptographic certainty.
-            </p>
-
-            {!wallet.isConnected ? (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <p className="text-blue-800">
-                  Connect your MetaMask wallet to begin minting and tracking
-                  batches.
-                </p>
-              </div>
-            ) : wallet.isCorrectNetwork ? (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <p className="text-green-800">
-                  Your wallet is connected to Sepolia testnet. Ready to proceed.
-                </p>
-              </div>
-            ) : (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                <p className="text-yellow-800">
-                  Please switch to Sepolia testnet to use this application.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Mint Feature */}
-            <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-              <div className="text-4xl mb-4">📝</div>
-              <h3 className="text-lg font-semibold mb-2">Mint Batch</h3>
-              <p className="text-sm text-muted mb-4">
-                Create a new batch NFT with metadata stored on IPFS
-              </p>
-              {wallet.isConnected && wallet.isCorrectNetwork && (
-                <Link
-                  href="/mint"
-                  className="inline-block px-4 py-2 bg-primary text-white rounded hover:bg-blue-600 transition text-sm"
-                >
-                  Go to Mint
-                </Link>
-              )}
-            </div>
-
-            {/* Record Step Feature */}
-            <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-              <div className="text-4xl mb-4">🔗</div>
-              <h3 className="text-lg font-semibold mb-2">Record Step</h3>
-              <p className="text-sm text-muted mb-4">
-                Record processing and transportation steps in the supply chain
-              </p>
-              {wallet.isConnected && wallet.isCorrectNetwork && (
-                <Link
-                  href="/record-step"
-                  className="inline-block px-4 py-2 bg-primary text-white rounded hover:bg-blue-600 transition text-sm"
-                >
-                  Record Step
-                </Link>
-              )}
-            </div>
-
-            {/* View Batch Feature */}
-            <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-              <div className="text-4xl mb-4">👁️</div>
-              <h3 className="text-lg font-semibold mb-2">View Batch</h3>
-              <p className="text-sm text-muted mb-4">
-                View complete batch history and traceability information
-              </p>
-              <Link
-                href="/batch/1"
-                className="inline-block px-4 py-2 bg-secondary text-white rounded hover:bg-green-600 transition text-sm"
-              >
-                Browse Example
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+              <Link href="/mint" className="btn-primary">
+                <span>Mint a Batch</span>
+                <ArrowRight size={16} strokeWidth={1.5} />
+              </Link>
+              <Link href="/explorer" className="btn-outline">
+                <span>Explore a Batch</span>
+                <span aria-hidden="true">↗</span>
               </Link>
             </div>
+            <div className="mt-14 flex items-center gap-3 text-xs text-ink/50">
+              <ShieldCheck size={17} className="text-forest" strokeWidth={1.5} />
+              <span>Immutable records. Human stories.</span>
+            </div>
+          </div>
 
-            {/* Timeline Feature */}
-            <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-              <div className="text-4xl mb-4">⏱️</div>
-              <h3 className="text-lg font-semibold mb-2">Timeline</h3>
-              <p className="text-sm text-muted mb-4">
-                View complete timeline of all custody transfers and steps
-              </p>
-              <button
-                disabled
-                className="px-4 py-2 bg-gray-300 text-gray-600 rounded cursor-not-allowed text-sm"
+          <div className="relative border border-forest/15 bg-sand/45 px-4 py-5 sm:px-8 sm:py-7">
+            <div className="mb-2 flex items-center justify-between border-b border-forest/10 pb-5">
+              <div>
+                <p className="eyebrow tracking-[0.24em]">Live record</p>
+                <h2 className="mt-2 font-serif text-2xl font-semibold">Batch #CC-0428</h2>
+              </div>
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-forest/20 text-forest"
+                aria-label="Verified batch"
               >
-                Coming Soon
-              </button>
+                <CheckCircle2 size={20} strokeWidth={1.4} />
+              </div>
+            </div>
+            <div className="mb-1 flex items-center justify-between pt-1 text-[10px] uppercase tracking-[0.16em] text-ink/45">
+              <span>Chain of custody</span>
+              <span>Sepolia / IPFS</span>
+            </div>
+            <div className="-mx-4 sm:-mx-8 [&>div]:py-2 [&_.space-y-12]:space-y-5 [&_.p-6]:rounded-none [&_.p-6]:bg-white/70 [&_.p-6]:p-4 [&_.p-6]:shadow-none [&_.text-sm]:text-xs [&_.text-xl]:text-lg">
+              <ProvenanceTimeline events={heroEvents} />
+            </div>
+            <div className="flex items-center justify-between border-t border-forest/10 pt-4 text-[10px] uppercase tracking-[0.16em] text-ink/45">
+              <span>3 verified steps</span>
+              <span className="font-mono normal-case tracking-normal text-forest">0x8f4e...abcd</span>
             </div>
           </div>
         </section>
 
-        {/* Information Section */}
-        <section className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold mb-6">How It Works</h2>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">For Artisans</h3>
-              <ol className="space-y-3 text-sm">
-                <li className="flex gap-3">
-                  <span className="font-bold text-primary">1.</span>
-                  <span>Connect your MetaMask wallet</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-bold text-primary">2.</span>
-                  <span>Navigate to "Mint Batch" page</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-bold text-primary">3.</span>
-                  <span>
-                    Enter batch information (name, origin, material, etc.)
-                  </span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-bold text-primary">4.</span>
-                  <span>Upload batch image</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-bold text-primary">5.</span>
-                  <span>Approve transaction in MetaMask</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-bold text-primary">6.</span>
-                  <span>Receive unique Token ID and QR code</span>
-                </li>
-              </ol>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">For Buyers</h3>
-              <ol className="space-y-3 text-sm">
-                <li className="flex gap-3">
-                  <span className="font-bold text-success">1.</span>
-                  <span>Scan QR code on product packaging</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-bold text-success">2.</span>
-                  <span>View batch details page</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-bold text-success">3.</span>
-                  <span>See complete ownership history</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-bold text-success">4.</span>
-                  <span>View all processing and transportation steps</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-bold text-success">5.</span>
-                  <span>Verify product authenticity</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="font-bold text-success">6.</span>
-                  <span>Make informed purchase decision</span>
-                </li>
-              </ol>
-            </div>
+        {/* Stats */}
+        <section
+          aria-label="Craft-Chain network statistics"
+          className="border-y border-forest/10 bg-sand/35"
+        >
+          <div className="mx-auto grid max-w-7xl grid-cols-2 gap-y-7 px-6 py-10 md:grid-cols-4 md:gap-y-0 md:px-12 lg:px-16">
+            {stats.map((s, i) => (
+              <div
+                key={s.label}
+                className={`px-4 md:px-8 ${i === 0 ? "pl-0 md:pl-0" : ""} ${
+                  i < stats.length - 1 ? "border-forest/10 max-md:odd:border-r md:border-r" : ""
+                }`}
+              >
+                <p className="font-serif text-3xl md:text-4xl">{s.value}</p>
+                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink/50">
+                  {s.label}
+                </p>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="mt-12 text-center text-sm text-muted">
-          <p>
-            Craft-Chain is an academic Web3 project demonstrating blockchain-based
-            supply chain traceability on Ethereum Sepolia testnet.
-          </p>
-          <p className="mt-2">
-            <a href="#" className="text-primary hover:underline">
-              Documentation
-            </a>
-            {" | "}
-            <a href="#" className="text-primary hover:underline">
-              GitHub
-            </a>
-            {" | "}
-            <a href="#" className="text-primary hover:underline">
-              Contact
-            </a>
-          </p>
-        </footer>
+        {/* Method */}
+        <section id="process" className="mx-auto max-w-7xl px-6 py-24 md:px-12 md:py-32 lg:px-16">
+          <div className="grid gap-14 lg:grid-cols-[0.62fr_1.38fr] lg:gap-24">
+            <div>
+              <p className="eyebrow mb-5">The method / 02</p>
+              <h2 className="max-w-sm font-serif text-4xl leading-[1.05] tracking-[-0.035em] md:text-5xl">
+                A clearer chain from hand to home.
+              </h2>
+              <p className="mt-6 max-w-sm text-sm leading-7 text-ink/60">
+                One considered record for every meaningful moment. Craft-Chain gives makers
+                and collectors a shared language for trust.
+              </p>
+            </div>
+            <ol className="grid grid-cols-1 divide-y divide-forest/10 border-y border-forest/10">
+              {steps.map(({ n, title, text, Icon }) => (
+                <li key={n} className="grid grid-cols-[52px_1fr_auto] items-center gap-5 py-6">
+                  <span className="font-mono text-xs text-brass">{n}</span>
+                  <div>
+                    <h3 className="font-serif text-xl font-semibold">{title}</h3>
+                    <p className="mt-1 text-sm text-ink/55">{text}</p>
+                  </div>
+                  <Icon size={22} className="text-forest" strokeWidth={1.3} />
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="mx-6 mb-24 border border-forest/10 bg-forest px-7 py-12 text-paper md:mx-12 md:px-14 lg:mx-auto lg:max-w-7xl lg:px-20">
+          <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+            <div>
+              <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.28em] text-[#D4AF75]">
+                Begin the record
+              </p>
+              <h2 className="max-w-xl font-serif text-3xl leading-tight md:text-4xl">
+                Give every object a story that can be trusted.
+              </h2>
+            </div>
+            <Link
+              href="/mint"
+              className="inline-flex shrink-0 items-center gap-3 border border-paper/35 px-6 py-4 text-xs font-bold uppercase tracking-[0.17em] transition-colors hover:bg-paper hover:text-forest"
+            >
+              <span>Mint a Batch</span>
+              <Sparkles size={15} strokeWidth={1.5} />
+            </Link>
+          </div>
+        </section>
       </main>
+      <Footer />
     </div>
   );
 }
