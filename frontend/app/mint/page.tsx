@@ -2,15 +2,22 @@
 
 import { useState, useCallback } from "react";
 import { ArrowUpRight, FileImage, Hash, Upload } from "lucide-react";
-import { StudioLayout, FieldLabel, FieldError } from "@/components/studio/StudioLayout";
-import { TransactionPanel, SuccessCard } from "@/components/studio/TransactionPanel";
+import {
+  StudioLayout,
+  FieldLabel,
+  FieldError,
+} from "@/components/studio/StudioLayout";
+import {
+  TransactionPanel,
+  SuccessCard,
+} from "@/components/studio/TransactionPanel";
 import { WalletConnect } from "@/components/WalletConnect";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Alert } from "@/components/Alert";
 import { useWallet } from "@/context/WalletContext";
 import { useContract } from "@/context/ContractContext";
-import { 
-  useFormValidation, 
+import {
+  useFormValidation,
   isValidImageFile,
   validateBatchForm,
   sanitizeString,
@@ -24,8 +31,16 @@ import { MintBatchFormData } from "@/types";
 export default function MintPage() {
   const { wallet } = useWallet();
   const { mintBatch, isLoading: contractLoading } = useContract();
-  const { errors, addError, removeError, clearErrors, setErrors } = useFormValidation();
-  const { status, result, setLoading, setSuccess, setError: setTxError, reset } = useTransactionStatus();
+  const { errors, addError, removeError, clearErrors, setErrors } =
+    useFormValidation();
+  const {
+    status,
+    result,
+    setLoading,
+    setSuccess,
+    setError: setTxError,
+    reset,
+  } = useTransactionStatus();
 
   const [formData, setFormData] = useState<MintBatchFormData>({
     batchName: "",
@@ -42,7 +57,9 @@ export default function MintPage() {
   const [lastMetadataURI, setLastMetadataURI] = useState<string | null>(null);
   const [suggestedAction, setSuggestedAction] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     removeError(name);
@@ -52,7 +69,10 @@ export default function MintPage() {
     const file = e.currentTarget.files?.[0];
     if (file) {
       if (!isValidImageFile(file)) {
-        addError("image", "Invalid image file. Must be JPEG, PNG, GIF, or WebP and less than 5MB.");
+        addError(
+          "image",
+          "Invalid image file. Must be JPEG, PNG, GIF, or WebP and less than 5MB."
+        );
       } else {
         removeError("image");
         setFormData((prev) => ({ ...prev, image: file }));
@@ -62,12 +82,12 @@ export default function MintPage() {
 
   const validateForm = useCallback((): boolean => {
     const validationErrors = validateBatchForm(formData);
-    
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return false;
     }
-    
+
     clearErrors();
     return true;
   }, [formData, setErrors, clearErrors]);
@@ -79,14 +99,15 @@ export default function MintPage() {
       return;
     }
 
-    // Try to mint again with cached metadata
     setIsRetrying(true);
     setLoading();
     setSuggestedAction(null);
 
     try {
-      logDebug("Retrying mint transaction with cached metadata", { metadataURI: lastMetadataURI });
-      
+      logDebug("Retrying mint transaction with cached metadata", {
+        metadataURI: lastMetadataURI,
+      });
+
       const txHash = await mintBatch(wallet.address!, lastMetadataURI);
       if (txHash) {
         setSuccess(txHash);
@@ -101,7 +122,14 @@ export default function MintPage() {
     } finally {
       setIsRetrying(false);
     }
-  }, [lastMetadataURI, mintBatch, wallet.address, setLoading, setSuccess, setTxError]);
+  }, [
+    lastMetadataURI,
+    mintBatch,
+    wallet.address,
+    setLoading,
+    setSuccess,
+    setTxError,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,7 +146,6 @@ export default function MintPage() {
     try {
       logDebug("Starting batch mint process");
 
-      // Create and upload metadata
       setUploadProgress(25);
       logDebug("Creating batch metadata");
       const metadata = await createBatchMetadata(
@@ -139,7 +166,6 @@ export default function MintPage() {
       setUploadProgress(75);
       logDebug("Minting batch NFT");
 
-      // Mint batch
       const txHash = await mintBatch(wallet.address!, metadataURI);
 
       if (txHash) {
@@ -150,17 +176,22 @@ export default function MintPage() {
       }
     } catch (error: unknown) {
       logError("Mint process failed", error);
-      
+
       const message = getUserMessage(error);
       const action = getSuggestedAction(error);
-      
+
       setTxError(message);
       setSuggestedAction(action || null);
       setUploadProgress(0);
     }
   };
 
-  const phase = status === "success" ? 3 : status === "pending" && uploadProgress >= 75 ? 1 : 0;
+  const phase =
+    status === "success"
+      ? 3
+      : status === "pending" && uploadProgress >= 75
+        ? 1
+        : 0;
 
   const resetAll = () => {
     reset();
@@ -196,7 +227,12 @@ export default function MintPage() {
                   onDismiss={reset}
                 />
                 {suggestedAction && (
-                  <Alert type="info" title="Suggested Action" message={suggestedAction} dismissible={false} />
+                  <Alert
+                    type="info"
+                    title="Suggested Action"
+                    message={suggestedAction}
+                    dismissible={false}
+                  />
                 )}
                 <div className="flex gap-3">
                   <button
@@ -209,15 +245,27 @@ export default function MintPage() {
                     Clear &amp; Start Over
                   </button>
                   {lastMetadataURI && (
-                    <button onClick={handleRetry} disabled={isRetrying} className="btn-primary flex-1">
-                      {isRetrying ? <LoadingSpinner size="sm" /> : "Retry Transaction"}
+                    <button
+                      onClick={handleRetry}
+                      disabled={isRetrying}
+                      className="btn-primary flex-1"
+                    >
+                      {isRetrying ? (
+                        <LoadingSpinner size="sm" />
+                      ) : (
+                        "Retry Transaction"
+                      )}
                     </button>
                   )}
                 </div>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-8" aria-label="Mint a new batch">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-8"
+              aria-label="Mint a new batch"
+            >
               <div className="grid gap-8 md:grid-cols-2">
                 <div className="md:col-span-2">
                   <FieldLabel>Batch Name</FieldLabel>
@@ -292,7 +340,9 @@ export default function MintPage() {
                     }`}
                   >
                     <Upload size={16} />
-                    <span>{formData.image?.name || "Choose a provenance image"}</span>
+                    <span>
+                      {formData.image?.name || "Choose a provenance image"}
+                    </span>
                   </label>
                   <input
                     id="image-input"
@@ -301,7 +351,9 @@ export default function MintPage() {
                     onChange={handleImageChange}
                     className="sr-only"
                   />
-                  <p className="mt-1 text-xs text-ink/50">JPEG, PNG, GIF or WebP, max 5MB</p>
+                  <p className="mt-1 text-xs text-ink/50">
+                    JPEG, PNG, GIF or WebP, max 5MB
+                  </p>
                   <FieldError message={errors.image} />
                 </div>
               </div>
@@ -309,10 +361,16 @@ export default function MintPage() {
               {status === "pending" && uploadProgress > 0 && (
                 <div>
                   <div className="h-1 w-full bg-forest/10">
-                    <div className="h-1 bg-forest transition-all" style={{ width: `${uploadProgress}%` }} />
+                    <div
+                      className="h-1 bg-forest transition-all"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
                   </div>
                   <p className="mt-2 text-sm text-ink/60">
-                    {uploadProgress}% - {uploadProgress < 75 ? "Uploading to IPFS..." : "Minting NFT..."}
+                    {uploadProgress}% -{" "}
+                    {uploadProgress < 75
+                      ? "Uploading to IPFS..."
+                      : "Minting NFT..."}
                   </p>
                 </div>
               )}
@@ -339,20 +397,30 @@ export default function MintPage() {
                   <p className="eyebrow">Metadata</p>
                   <h2 className="mt-2 text-2xl">IPFS Preview</h2>
                 </div>
-                <FileImage size={20} strokeWidth={1.5} className="text-forest" />
+                <FileImage
+                  size={20}
+                  strokeWidth={1.5}
+                  className="text-forest"
+                />
               </div>
               <dl className="space-y-4 border-t border-forest/15 pt-5 text-sm">
                 <div className="flex justify-between gap-4">
                   <dt className="text-ink/60">Name</dt>
-                  <dd className="text-right font-medium">{formData.batchName || "Untitled batch"}</dd>
+                  <dd className="text-right font-medium">
+                    {formData.batchName || "Untitled batch"}
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-ink/60">Origin</dt>
-                  <dd className="text-right font-medium">{formData.origin || "Awaiting input"}</dd>
+                  <dd className="text-right font-medium">
+                    {formData.origin || "Awaiting input"}
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-ink/60">Image</dt>
-                  <dd className="break-all text-right font-medium">{formData.image?.name || "Not attached"}</dd>
+                  <dd className="break-all text-right font-medium">
+                    {formData.image?.name || "Not attached"}
+                  </dd>
                 </div>
               </dl>
               <div className="mt-6 flex items-center gap-2 border-t border-forest/15 pt-4 text-xs text-ink/60">
