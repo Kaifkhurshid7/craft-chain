@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useWallet } from "@/context/WalletContext";
 
 export function WalletConnect() {
@@ -7,70 +8,55 @@ export function WalletConnect() {
     useWallet();
 
   if (wallet.isConnected && wallet.isCorrectNetwork) {
-    return null; // Hide if already connected to correct network
+    return null;
   }
 
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-      <div className="flex justify-between items-start gap-4">
+    <div className="mb-6 border border-forest/15 bg-sand/60 p-6">
+      <div className="flex items-start justify-between gap-4">
         <div>
           {!wallet.isConnected ? (
             <>
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                Connect Your Wallet
-              </h3>
-              <p className="text-sm text-blue-800 mb-4">
-                Connect MetaMask to mint batches, record steps, and transfer
-                ownership.
+              <p className="eyebrow mb-2">Wallet required</p>
+              <h3 className="mb-2 font-serif text-xl font-semibold">Connect your wallet</h3>
+              <p className="mb-4 text-sm text-ink/65">
+                Connect MetaMask to mint batches, record steps, and transfer ownership.
               </p>
-              <button
-                onClick={connect}
-                disabled={isLoading}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition font-medium"
-              >
+              <button onClick={connect} disabled={isLoading} className="btn-primary">
                 {isLoading ? "Connecting..." : "Connect MetaMask"}
               </button>
             </>
-          ) : !wallet.isCorrectNetwork ? (
+          ) : (
             <>
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                Switch to Sepolia Testnet
-              </h3>
-              <p className="text-sm text-blue-800 mb-4">
-                This application requires Ethereum Sepolia testnet. Please
-                switch your network.
+              <p className="eyebrow mb-2">Wrong network</p>
+              <h3 className="mb-2 font-serif text-xl font-semibold">Switch to Sepolia</h3>
+              <p className="mb-4 text-sm text-ink/65">
+                This application requires the Ethereum Sepolia testnet.
               </p>
-              <button
-                onClick={switchNetwork}
-                disabled={isLoading}
-                className="px-4 py-2 bg-warning text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 transition font-medium"
-              >
+              <button onClick={switchNetwork} disabled={isLoading} className="btn-primary">
                 {isLoading ? "Switching..." : "Switch to Sepolia"}
               </button>
             </>
-          ) : null}
+          )}
         </div>
 
-        <button
-          onClick={disconnect}
-          className="text-gray-400 hover:text-gray-600 transition"
-          aria-label="Close"
-        >
-          ✕
-        </button>
+        {wallet.isConnected && (
+          <button
+            onClick={disconnect}
+            className="text-ink/40 transition hover:text-ink"
+            aria-label="Disconnect"
+          >
+            <X size={18} strokeWidth={1.5} />
+          </button>
+        )}
       </div>
 
       {error && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800">
-          <div className="flex justify-between items-start">
-            <span>{error}</span>
-            <button
-              onClick={clearError}
-              className="text-red-600 hover:text-red-800 ml-2"
-            >
-              ✕
-            </button>
-          </div>
+        <div className="mt-4 flex items-start justify-between border border-danger/20 bg-danger/5 p-3 text-sm text-danger">
+          <span>{error}</span>
+          <button onClick={clearError} className="ml-2" aria-label="Dismiss">
+            <X size={14} />
+          </button>
         </div>
       )}
     </div>
