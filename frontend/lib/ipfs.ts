@@ -22,32 +22,20 @@ const RETRIEVAL_TIMEOUT_MS = 30000; // 30 seconds for retrievals
 /**
  * Get IPFS configuration from environment
  */
-function getIPFSConfig() {
-  const pinataJWT = process.env.NEXT_PUBLIC_PINATA_JWT;
-  const ipfsGateway =
-    process.env.NEXT_PUBLIC_IPFS_GATEWAY || IPFS_GATEWAYS[0];
-
-  if (!pinataJWT) {
-    logWarn("NEXT_PUBLIC_PINATA_JWT not configured - IPFS uploads will fail");
-  }
-
+function getIPFSConfig(): { ipfsGateway: string } {
   return {
-    pinataJWT,
-    ipfsGateway,
-    pinataUrl: "https://api.pinata.cloud",
+    ipfsGateway: process.env.NEXT_PUBLIC_IPFS_GATEWAY || IPFS_GATEWAYS[0],
   };
 }
 
 /**
  * Create an AbortController with timeout
  */
+const timeoutIds = new WeakMap<AbortController, ReturnType<typeof setTimeout>>();
+
 function createTimeoutAbortController(timeoutMs: number): AbortController {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-  
-  // Store timeout ID for potential cleanup
-  (controller as any)._timeoutId = timeoutId;
-  
+  timeoutIds.set(controller, setTimeout(() => controller.abort(), timeoutMs));
   return controller;
 }
 
@@ -55,7 +43,7 @@ function createTimeoutAbortController(timeoutMs: number): AbortController {
  * Cleanup timeout from AbortController
  */
 function cleanupTimeoutAbortController(controller: AbortController): void {
-  const timeoutId = (controller as any)._timeoutId;
+  const timeoutId = timeoutIds.get(controller);
   if (timeoutId) {
     clearTimeout(timeoutId);
   }
@@ -67,14 +55,7 @@ function cleanupTimeoutAbortController(controller: AbortController): void {
  * @returns IPFS CID and URL
  */
 export async function uploadFile(file: File): Promise<IPFSUploadResponse> {
-  const { pinataJWT, ipfsGateway } = getIPFSConfig();
-
-  if (!pinataJWT) {
-    throw new IPFSError(
-      "Pinata JWT not configured",
-      "IPFS upload is not configured. Please set NEXT_PUBLIC_PINATA_JWT environment variable."
-    );
-  }
+  const { ipfsGateway } = getIPFSConfig();
 
   // Validate file
   if (!file || file.size === 0) {
@@ -114,11 +95,9 @@ export async function uploadFile(file: File): Promise<IPFSUploadResponse> {
 
     logDebug("Starting IPFS file upload", { fileName: file.name, fileSize: file.size });
 
-    const response = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+    // Goes through our server route so the Pinata JWT never reaches the browser
+    const response = await fetch("/api/ipfs/file", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${pinataJWT}`,
-      },
       body: formData,
       signal: controller.signal,
     });
@@ -499,13 +478,6 @@ export function verifyDataHash(data: unknown, onChainHash: string): boolean {
  * @param cid IPFS content identifier to pin
  */
 export async function pinCIDToPersistence(cid: string): Promise<void> {
-  const { pinataJWT } = getIPFSConfig();
-
-  if (!pinataJWT) {
-    logWarn("Pinata JWT not configured - cannot pin CID");
-    return;
-  }
-
   if (!cid || cid.trim().length === 0) {
     throw new IPFSError(
       "CID is required",
@@ -518,11 +490,10 @@ export async function pinCIDToPersistence(cid: string): Promise<void> {
   try {
     logDebug("Pinning CID to persistence", { cid });
 
-    const response = await fetch("https://api.pinata.cloud/pinning/pinByHash", {
+    const response = await fetch("/api/ipfs/pin-hash", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${pinataJWT}`,
       },
       body: JSON.stringify({
         hashToPin: cid,
@@ -611,20 +582,11 @@ export async function checkIPFSGateway(): Promise<boolean> {
  * @returns True if Pinata API is accessible
  */
 export async function checkPinataService(): Promise<boolean> {
-  const { pinataJWT } = getIPFSConfig();
-
-  if (!pinataJWT) {
-    return false;
-  }
-
   const controller = createTimeoutAbortController(10000);
 
   try {
-    const response = await fetch("https://api.pinata.cloud/data/testAuthentication", {
+    const response = await fetch("/api/ipfs/status", {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${pinataJWT}`,
-      },
       signal: controller.signal,
     });
 
