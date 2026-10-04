@@ -176,8 +176,11 @@ export function useAsyncWithRetry<T>(
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        logDebug("Executing async operation", { attempt: attempt + 1, maxAttempts: maxRetries + 1 });
-        
+        logDebug("Executing async operation", {
+          attempt: attempt + 1,
+          maxAttempts: maxRetries + 1,
+        });
+
         setAttemptCount(attempt + 1);
 
         const response = await asyncFunction();
@@ -189,13 +192,14 @@ export function useAsyncWithRetry<T>(
 
         if (attempt < maxRetries && isRetryable(error)) {
           const delayMs = calculateDelay(attempt);
-          logWarn(`Attempt ${attempt + 1} failed, retrying in ${delayMs}ms`, error);
+          logWarn(
+            `Attempt ${attempt + 1} failed, retrying in ${delayMs}ms`,
+            error
+          );
           setIsRetrying(true);
 
-          // Wait before retrying
           await new Promise((resolve) => {
             const timeoutId = setTimeout(resolve, delayMs);
-            // Allow cancellation
             abortControllerRef.current!.signal.addEventListener("abort", () => {
               clearTimeout(timeoutId);
               resolve(null);
@@ -292,7 +296,6 @@ function defaultIsRetryable(error: unknown): boolean {
     return false;
   }
 
-  // Retry network-related errors
   if (
     message.includes("ECONNREFUSED") ||
     message.includes("ECONNRESET") ||
@@ -304,7 +307,6 @@ function defaultIsRetryable(error: unknown): boolean {
     return true;
   }
 
-  // Retry by default for unknown errors
   return true;
 }
 
@@ -320,17 +322,14 @@ export function createRetryPredicate(
     const code = err.code || "";
     const message = err.message || "";
 
-    // Explicit no-retry codes
     if (noRetryOnCodes?.includes(code)) {
       return false;
     }
 
-    // Explicit retry codes
     if (retryOnCodes?.includes(code)) {
       return true;
     }
 
-    // Fall back to default predicate
     return defaultIsRetryable(error);
   };
 }
