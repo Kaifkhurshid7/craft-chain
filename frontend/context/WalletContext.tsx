@@ -5,7 +5,13 @@
 
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { WalletState, DEFAULT_WALLET_STATE } from "@/types";
 import {
   getConnectedAddress,
@@ -83,7 +89,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
    */
   const connect = useCallback(async () => {
     if (!isMetaMaskInstalled()) {
-      setError("MetaMask is not installed. Please install MetaMask to continue.");
+      setError(
+        "MetaMask is not installed. Please install MetaMask to continue."
+      );
       return;
     }
 
@@ -91,18 +99,18 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
-      // Request account access
       await window.ethereum.request({
         method: "eth_requestAccounts",
       });
 
-      // Update wallet state
       await updateWalletState();
     } catch (err: unknown) {
       const ethereumError = err as { code?: number; message?: string };
 
       if (ethereumError.code === 4001) {
-        setError("Connection rejected. Please approve the connection in MetaMask.");
+        setError(
+          "Connection rejected. Please approve the connection in MetaMask."
+        );
       } else if (ethereumError.code === -32002) {
         setError("Connection already pending. Please check MetaMask.");
       } else {
@@ -168,25 +176,20 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Update on mount
     updateWalletState();
 
-    // Listen for account changes
     const handleAccountsChanged = () => {
       updateWalletState();
     };
 
-    // Listen for chain changes
     const handleChainChanged = () => {
       updateWalletState();
     };
 
-    // Listen for connection
     const handleConnect = () => {
       updateWalletState();
     };
 
-    // Listen for disconnection
     const handleDisconnect = () => {
       setWallet(DEFAULT_WALLET_STATE);
     };
@@ -196,7 +199,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     window.ethereum.on("connect", handleConnect);
     window.ethereum.on("disconnect", handleDisconnect);
 
-    // Cleanup
     return () => {
       window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
       window.ethereum.removeListener("chainChanged", handleChainChanged);

@@ -3,7 +3,12 @@
  * Provides helper functions for common blockchain operations
  */
 
-import { ethers, BrowserProvider, Contract, ContractTransactionResponse } from "ethers";
+import {
+  ethers,
+  BrowserProvider,
+  Contract,
+  ContractTransactionResponse,
+} from "ethers";
 import { isValidAddress, isValidTokenId, isValidStepHash } from "@/types";
 import { CRAFT_BATCH_ABI, getContractConfig } from "./contract";
 import {
@@ -119,7 +124,11 @@ export async function switchToSepolia(): Promise<void> {
     });
     logDebug("Successfully switched to Sepolia network");
   } catch (error: unknown) {
-    const switchError = error as { code: number; data?: { chainId: string }; message?: string };
+    const switchError = error as {
+      code: number;
+      data?: { chainId: string };
+      message?: string;
+    };
 
     // Chain not added to MetaMask, add it
     if (switchError.code === 4902) {
@@ -130,9 +139,7 @@ export async function switchToSepolia(): Promise<void> {
             {
               chainId: "0xaa36a7",
               chainName: "Sepolia Testnet",
-              rpcUrls: [
-                "https://eth-sepolia.g.alchemy.com/v2/demo",
-              ],
+              rpcUrls: ["https://eth-sepolia.g.alchemy.com/v2/demo"],
               blockExplorerUrls: ["https://sepolia.etherscan.io"],
               nativeCurrency: {
                 name: "Sepolia Ether",
@@ -197,7 +204,10 @@ export async function estimateGas(
   try {
     const contract = await getContractWithSigner();
     const gasEstimate = await contract[functionName].estimateGas(...params);
-    logDebug("Gas estimate calculated", { functionName, gasEstimate: gasEstimate.toString() });
+    logDebug("Gas estimate calculated", {
+      functionName,
+      gasEstimate: gasEstimate.toString(),
+    });
     // Add 20% buffer to account for state changes
     return (gasEstimate * BigInt(120)) / BigInt(100);
   } catch (error) {
@@ -222,8 +232,7 @@ export async function hasSufficientGas(requiredGas: bigint): Promise<boolean> {
 
     const balance = await getBalance(address);
     const balanceBigInt = BigInt(balance);
-    
-    // Estimate gas price
+
     const provider = getProvider();
     const gasPrice = (await provider.getFeeData()).gasPrice ?? BigInt(0);
     const requiredEth = requiredGas * gasPrice;
@@ -262,7 +271,6 @@ export async function mintBatch(
   to: string,
   metadataURI: string
 ): Promise<string> {
-  // Input validation
   if (!isValidAddress(to)) {
     throw new ValidationError(
       "Invalid recipient address",
@@ -290,7 +298,6 @@ export async function mintBatch(
   try {
     logDebug("Starting mintBatch transaction", { to, metadataURI });
 
-    // Check network
     const onSepolia = await isOnSepolia();
     if (!onSepolia) {
       throw new NetworkError(
@@ -299,20 +306,19 @@ export async function mintBatch(
       );
     }
 
-    // Estimate gas
     const contract = await getContractWithSigner();
     let gasEstimate;
     try {
       gasEstimate = await contract.mintBatch.estimateGas(to, metadataURI);
-      // Add 20% buffer
       gasEstimate = (gasEstimate * BigInt(120)) / BigInt(100);
-      logDebug("Gas estimate for mintBatch", { gasEstimate: gasEstimate.toString() });
+      logDebug("Gas estimate for mintBatch", {
+        gasEstimate: gasEstimate.toString(),
+      });
     } catch (gasError) {
       logWarn("Gas estimation failed, using default", gasError);
       gasEstimate = BigInt(500000);
     }
 
-    // Check sufficient gas
     const hasSufficient = await hasSufficientGas(gasEstimate);
     if (!hasSufficient) {
       throw new GasError(
@@ -322,10 +328,13 @@ export async function mintBatch(
       );
     }
 
-    // Execute transaction
-    const tx: ContractTransactionResponse | null = await contract.mintBatch(to, metadataURI, {
-      gasLimit: gasEstimate,
-    });
+    const tx: ContractTransactionResponse | null = await contract.mintBatch(
+      to,
+      metadataURI,
+      {
+        gasLimit: gasEstimate,
+      }
+    );
 
     if (!tx) {
       throw new TransactionError(
@@ -337,7 +346,6 @@ export async function mintBatch(
 
     logDebug("Transaction submitted", { txHash: tx.hash });
 
-    // Wait for confirmation
     const receipt = await tx.wait(1); // Wait for 1 confirmation
     if (!receipt) {
       throw new TransactionError(
@@ -345,21 +353,27 @@ export async function mintBatch(
         "Transaction was submitted but receipt could not be confirmed. Please check Etherscan.",
         {
           recoverable: true,
-          suggestedAction: "Check transaction status on Etherscan using the transaction hash.",
+          suggestedAction:
+            "Check transaction status on Etherscan using the transaction hash.",
         }
       );
     }
 
-    logDebug("Transaction confirmed", { blockNumber: receipt.blockNumber, txHash: receipt.hash });
+    logDebug("Transaction confirmed", {
+      blockNumber: receipt.blockNumber,
+      txHash: receipt.hash,
+    });
     return receipt.hash;
   } catch (error) {
     // Check if it's already an AppError
     if (error instanceof Error && error.constructor.name.includes("Error")) {
       // Re-throw if it's already our custom error
-      if (error.constructor.name.startsWith("Validation") ||
-          error.constructor.name.startsWith("Network") ||
-          error.constructor.name.startsWith("Transaction") ||
-          error.constructor.name.startsWith("Gas")) {
+      if (
+        error.constructor.name.startsWith("Validation") ||
+        error.constructor.name.startsWith("Network") ||
+        error.constructor.name.startsWith("Transaction") ||
+        error.constructor.name.startsWith("Gas")
+      ) {
         throw error;
       }
     }
@@ -379,7 +393,6 @@ export async function recordStep(
   tokenId: number,
   stepHash: string
 ): Promise<string> {
-  // Input validation
   if (!isValidTokenId(tokenId)) {
     throw new ValidationError(
       "Invalid token ID",
@@ -399,7 +412,6 @@ export async function recordStep(
   try {
     logDebug("Starting recordStep transaction", { tokenId, stepHash });
 
-    // Check network
     const onSepolia = await isOnSepolia();
     if (!onSepolia) {
       throw new NetworkError(
@@ -408,7 +420,6 @@ export async function recordStep(
       );
     }
 
-    // Get contract and verify ownership
     const contract = await getContractWithSigner();
     const currentAddress = await getConnectedAddress();
     if (!currentAddress) {
@@ -418,7 +429,6 @@ export async function recordStep(
       );
     }
 
-    // Verify caller is token owner
     try {
       const owner = await contract.ownerOf(tokenId);
       if (owner.toLowerCase() !== currentAddress.toLowerCase()) {
@@ -438,19 +448,18 @@ export async function recordStep(
       throw ownerError;
     }
 
-    // Estimate gas
     let gasEstimate;
     try {
       gasEstimate = await contract.recordStep.estimateGas(tokenId, stepHash);
-      // Add 20% buffer
       gasEstimate = (gasEstimate * BigInt(120)) / BigInt(100);
-      logDebug("Gas estimate for recordStep", { gasEstimate: gasEstimate.toString() });
+      logDebug("Gas estimate for recordStep", {
+        gasEstimate: gasEstimate.toString(),
+      });
     } catch (gasError) {
       logWarn("Gas estimation failed, using default", gasError);
       gasEstimate = BigInt(300000);
     }
 
-    // Check sufficient gas
     const hasSufficient = await hasSufficientGas(gasEstimate);
     if (!hasSufficient) {
       throw new GasError(
@@ -460,7 +469,6 @@ export async function recordStep(
       );
     }
 
-    // Execute transaction
     const tx: ContractTransactionResponse | null = await contract.recordStep(
       tokenId,
       stepHash,
@@ -477,7 +485,6 @@ export async function recordStep(
 
     logDebug("Transaction submitted", { txHash: tx.hash });
 
-    // Wait for confirmation
     const receipt = await tx.wait(1);
     if (!receipt) {
       throw new TransactionError(
@@ -492,13 +499,15 @@ export async function recordStep(
   } catch (error) {
     // Check if it's already an AppError
     if (error instanceof Error && error.constructor.name.includes("Error")) {
-      if (error.constructor.name.startsWith("Validation") ||
-          error.constructor.name.startsWith("Network") ||
-          error.constructor.name.startsWith("Transaction") ||
-          error.constructor.name.startsWith("Gas") ||
-          error.constructor.name.startsWith("Permission") ||
-          error.constructor.name.startsWith("Wallet") ||
-          error.constructor.name.startsWith("NotFound")) {
+      if (
+        error.constructor.name.startsWith("Validation") ||
+        error.constructor.name.startsWith("Network") ||
+        error.constructor.name.startsWith("Transaction") ||
+        error.constructor.name.startsWith("Gas") ||
+        error.constructor.name.startsWith("Permission") ||
+        error.constructor.name.startsWith("Wallet") ||
+        error.constructor.name.startsWith("NotFound")
+      ) {
         throw error;
       }
     }
@@ -518,7 +527,6 @@ export async function transferBatch(
   to: string,
   tokenId: number
 ): Promise<string> {
-  // Input validation
   if (!isValidAddress(to)) {
     throw new ValidationError(
       "Invalid recipient address",
@@ -538,7 +546,6 @@ export async function transferBatch(
   try {
     logDebug("Starting transferBatch transaction", { to, tokenId });
 
-    // Check network
     const onSepolia = await isOnSepolia();
     if (!onSepolia) {
       throw new NetworkError(
@@ -547,7 +554,6 @@ export async function transferBatch(
       );
     }
 
-    // Get connected address
     const fromAddress = await getConnectedAddress();
     if (!fromAddress) {
       throw new WalletError(
@@ -556,7 +562,6 @@ export async function transferBatch(
       );
     }
 
-    // Prevent self-transfer
     if (fromAddress.toLowerCase() === to.toLowerCase()) {
       throw new ValidationError(
         "Cannot transfer to self",
@@ -565,7 +570,6 @@ export async function transferBatch(
       );
     }
 
-    // Verify caller is token owner
     const contract = await getContractWithSigner();
     try {
       const owner = await contract.ownerOf(tokenId);
@@ -586,19 +590,22 @@ export async function transferBatch(
       throw ownerError;
     }
 
-    // Estimate gas
     let gasEstimate;
     try {
-      gasEstimate = await contract.safeTransferFrom.estimateGas(fromAddress, to, tokenId);
-      // Add 20% buffer
+      gasEstimate = await contract.safeTransferFrom.estimateGas(
+        fromAddress,
+        to,
+        tokenId
+      );
       gasEstimate = (gasEstimate * BigInt(120)) / BigInt(100);
-      logDebug("Gas estimate for transfer", { gasEstimate: gasEstimate.toString() });
+      logDebug("Gas estimate for transfer", {
+        gasEstimate: gasEstimate.toString(),
+      });
     } catch (gasError) {
       logWarn("Gas estimation failed, using default", gasError);
       gasEstimate = BigInt(300000);
     }
 
-    // Check sufficient gas
     const hasSufficient = await hasSufficientGas(gasEstimate);
     if (!hasSufficient) {
       throw new GasError(
@@ -608,13 +615,10 @@ export async function transferBatch(
       );
     }
 
-    // Execute transaction
-    const tx: ContractTransactionResponse | null = await contract.safeTransferFrom(
-      fromAddress,
-      to,
-      tokenId,
-      { gasLimit: gasEstimate }
-    );
+    const tx: ContractTransactionResponse | null =
+      await contract.safeTransferFrom(fromAddress, to, tokenId, {
+        gasLimit: gasEstimate,
+      });
 
     if (!tx) {
       throw new TransactionError(
@@ -626,7 +630,6 @@ export async function transferBatch(
 
     logDebug("Transaction submitted", { txHash: tx.hash });
 
-    // Wait for confirmation
     const receipt = await tx.wait(1);
     if (!receipt) {
       throw new TransactionError(
@@ -641,13 +644,15 @@ export async function transferBatch(
   } catch (error) {
     // Check if it's already an AppError
     if (error instanceof Error && error.constructor.name.includes("Error")) {
-      if (error.constructor.name.startsWith("Validation") ||
-          error.constructor.name.startsWith("Network") ||
-          error.constructor.name.startsWith("Transaction") ||
-          error.constructor.name.startsWith("Gas") ||
-          error.constructor.name.startsWith("Permission") ||
-          error.constructor.name.startsWith("Wallet") ||
-          error.constructor.name.startsWith("NotFound")) {
+      if (
+        error.constructor.name.startsWith("Validation") ||
+        error.constructor.name.startsWith("Network") ||
+        error.constructor.name.startsWith("Transaction") ||
+        error.constructor.name.startsWith("Gas") ||
+        error.constructor.name.startsWith("Permission") ||
+        error.constructor.name.startsWith("Wallet") ||
+        error.constructor.name.startsWith("NotFound")
+      ) {
         throw error;
       }
     }
@@ -676,7 +681,10 @@ export async function getBatchOwner(tokenId: number): Promise<string> {
     return await contract.ownerOf(tokenId);
   } catch (error: unknown) {
     const err = error as { reason?: string; message?: string };
-    if (err.reason?.includes("does not exist") || err.message?.includes("does not exist")) {
+    if (
+      err.reason?.includes("does not exist") ||
+      err.message?.includes("does not exist")
+    ) {
       throw new NotFoundError(
         `Token ${tokenId} does not exist`,
         `Batch NFT with ID ${tokenId} does not exist.`
@@ -706,7 +714,10 @@ export async function getBatchMetadataURI(tokenId: number): Promise<string> {
     return await contract.tokenURI(tokenId);
   } catch (error: unknown) {
     const err = error as { reason?: string; message?: string };
-    if (err.reason?.includes("does not exist") || err.message?.includes("does not exist")) {
+    if (
+      err.reason?.includes("does not exist") ||
+      err.message?.includes("does not exist")
+    ) {
       throw new NotFoundError(
         `Token ${tokenId} does not exist`,
         `Batch NFT with ID ${tokenId} does not exist.`
@@ -738,7 +749,10 @@ export async function getBatchSteps(
     return await contract.getBatchSteps(tokenId);
   } catch (error: unknown) {
     const err = error as { reason?: string; message?: string };
-    if (err.reason?.includes("does not exist") || err.message?.includes("does not exist")) {
+    if (
+      err.reason?.includes("does not exist") ||
+      err.message?.includes("does not exist")
+    ) {
       throw new NotFoundError(
         `Token ${tokenId} does not exist`,
         `Batch NFT with ID ${tokenId} does not exist.`
@@ -769,7 +783,10 @@ export async function getStepCount(tokenId: number): Promise<number> {
     return Number(count);
   } catch (error: unknown) {
     const err = error as { reason?: string; message?: string };
-    if (err.reason?.includes("does not exist") || err.message?.includes("does not exist")) {
+    if (
+      err.reason?.includes("does not exist") ||
+      err.message?.includes("does not exist")
+    ) {
       throw new NotFoundError(
         `Token ${tokenId} does not exist`,
         `Batch NFT with ID ${tokenId} does not exist.`
@@ -811,13 +828,19 @@ export async function getStep(
     return await contract.getStep(tokenId, stepIndex);
   } catch (error: unknown) {
     const err = error as { reason?: string; message?: string };
-    if (err.reason?.includes("does not exist") || err.message?.includes("does not exist")) {
+    if (
+      err.reason?.includes("does not exist") ||
+      err.message?.includes("does not exist")
+    ) {
       throw new NotFoundError(
         `Token ${tokenId} does not exist`,
         `Batch NFT with ID ${tokenId} does not exist.`
       );
     }
-    if (err.reason?.includes("out of bounds") || err.message?.includes("out of bounds")) {
+    if (
+      err.reason?.includes("out of bounds") ||
+      err.message?.includes("out of bounds")
+    ) {
       throw new ValidationError(
         "Step index out of bounds",
         `Step index ${stepIndex} is out of bounds for this batch.`,
@@ -882,7 +905,12 @@ export function onBatchMinted(
  */
 export function onStepRecorded(
   tokenId: number | null,
-  callback: (tokenId: number, actor: string, stepHash: string, timestamp: number) => void
+  callback: (
+    tokenId: number,
+    actor: string,
+    stepHash: string,
+    timestamp: number
+  ) => void
 ): () => void {
   const contract = getContractReadOnly();
 
