@@ -28,7 +28,8 @@ const nextConfig = {
 
   // Environment variables
   env: {
-    NEXT_PUBLIC_CHAIN_ID: process.env.NEXT_PUBLIC_SEPOLIA_CHAIN_ID || "11155111",
+    NEXT_PUBLIC_CHAIN_ID:
+      process.env.NEXT_PUBLIC_SEPOLIA_CHAIN_ID || "11155111",
   },
 
   // Webpack configuration for browser compatibility
