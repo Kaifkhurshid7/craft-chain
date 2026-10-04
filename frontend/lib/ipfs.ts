@@ -9,7 +9,6 @@ import { hashStepData } from "./blockchain";
 import { parseIPFSError, TimeoutError, IPFSError } from "./errors";
 import { logDebug, logWarn, logError } from "./errorLogger";
 
-// IPFS Gateway fallbacks
 const IPFS_GATEWAYS = [
   "https://gateway.pinata.cloud/ipfs/",
   "https://cloudflare-ipfs.com/ipfs/",
@@ -31,11 +30,17 @@ function getIPFSConfig(): { ipfsGateway: string } {
 /**
  * Create an AbortController with timeout
  */
-const timeoutIds = new WeakMap<AbortController, ReturnType<typeof setTimeout>>();
+const timeoutIds = new WeakMap<
+  AbortController,
+  ReturnType<typeof setTimeout>
+>();
 
 function createTimeoutAbortController(timeoutMs: number): AbortController {
   const controller = new AbortController();
-  timeoutIds.set(controller, setTimeout(() => controller.abort(), timeoutMs));
+  timeoutIds.set(
+    controller,
+    setTimeout(() => controller.abort(), timeoutMs)
+  );
   return controller;
 }
 
@@ -57,12 +62,8 @@ function cleanupTimeoutAbortController(controller: AbortController): void {
 export async function uploadFile(file: File): Promise<IPFSUploadResponse> {
   const { ipfsGateway } = getIPFSConfig();
 
-  // Validate file
   if (!file || file.size === 0) {
-    throw new IPFSError(
-      "File is empty",
-      "Please select a file to upload."
-    );
+    throw new IPFSError("File is empty", "Please select a file to upload.");
   }
 
   if (file.size > 10 * 1024 * 1024) {
@@ -78,7 +79,6 @@ export async function uploadFile(file: File): Promise<IPFSUploadResponse> {
     const formData = new FormData();
     formData.append("file", file);
 
-    // Add metadata
     const metadata = JSON.stringify({
       name: file.name,
       type: file.type,
@@ -87,13 +87,15 @@ export async function uploadFile(file: File): Promise<IPFSUploadResponse> {
     });
     formData.append("pinataMetadata", metadata);
 
-    // Set pinning options
     const options = JSON.stringify({
       cidVersion: 1,
     });
     formData.append("pinataOptions", options);
 
-    logDebug("Starting IPFS file upload", { fileName: file.name, fileSize: file.size });
+    logDebug("Starting IPFS file upload", {
+      fileName: file.name,
+      fileSize: file.size,
+    });
 
     // Goes through our server route so the Pinata JWT never reaches the browser
     const response = await fetch("/api/ipfs/file", {
@@ -104,7 +106,7 @@ export async function uploadFile(file: File): Promise<IPFSUploadResponse> {
 
     if (!response.ok) {
       let errorMessage = "Failed to upload file to IPFS";
-      
+
       if (response.status === 401 || response.status === 403) {
         errorMessage = "IPFS authentication failed. Please check your API key.";
       } else if (response.status === 413) {
@@ -172,20 +174,14 @@ export async function uploadJSON(
   filename: string = "data.json"
 ): Promise<IPFSUploadResponse> {
   if (!data) {
-    throw new IPFSError(
-      "Data is required",
-      "Please provide data to upload."
-    );
+    throw new IPFSError("Data is required", "Please provide data to upload.");
   }
 
   try {
-    // Convert data to JSON string
     const jsonString = JSON.stringify(data, null, 2);
 
-    // Create a Blob from the JSON string
     const blob = new Blob([jsonString], { type: "application/json" });
 
-    // Create a File from the Blob
     const file = new File([blob], filename, { type: "application/json" });
 
     return await uploadFile(file);
@@ -206,7 +202,6 @@ export async function uploadJSON(
 export async function uploadBatchMetadata(
   metadata: BatchMetadata
 ): Promise<IPFSUploadResponse> {
-  // Validate metadata
   if (!metadata.name || metadata.name.trim().length === 0) {
     throw new IPFSError(
       "Batch name is required",
@@ -232,12 +227,8 @@ export async function uploadBatchMetadata(
 export async function uploadStepData(
   stepData: StepData
 ): Promise<IPFSUploadResponse> {
-  // Validate step data
   if (!stepData.stepType || stepData.stepType.trim().length === 0) {
-    throw new IPFSError(
-      "Step type is required",
-      "Please select a step type."
-    );
+    throw new IPFSError("Step type is required", "Please select a step type.");
   }
 
   if (!stepData.description || stepData.description.trim().length === 0) {
@@ -255,10 +246,7 @@ export async function uploadStepData(
   }
 
   if (!stepData.date || stepData.date.trim().length === 0) {
-    throw new IPFSError(
-      "Step date is required",
-      "Please enter the step date."
-    );
+    throw new IPFSError("Step date is required", "Please enter the step date.");
   }
 
   return uploadJSON(stepData, "step-data.json");
@@ -271,10 +259,7 @@ export async function uploadStepData(
  */
 export async function getIPFSJSON<T>(cid: string): Promise<T> {
   if (!cid || cid.trim().length === 0) {
-    throw new IPFSError(
-      "CID is required",
-      "Please provide a valid CID."
-    );
+    throw new IPFSError("CID is required", "Please provide a valid CID.");
   }
 
   // Support both raw CID and full IPFS URI
@@ -285,7 +270,6 @@ export async function getIPFSJSON<T>(cid: string): Promise<T> {
 
   logDebug("Retrieving data from IPFS", { cid: cidToUse });
 
-  // Try each gateway in sequence
   const errors: Error[] = [];
 
   for (const gateway of IPFS_GATEWAYS) {
@@ -303,7 +287,10 @@ export async function getIPFSJSON<T>(cid: string): Promise<T> {
 
         if (response.ok) {
           const data = (await response.json()) as T;
-          logDebug("Successfully retrieved data from IPFS", { cid: cidToUse, gateway });
+          logDebug("Successfully retrieved data from IPFS", {
+            cid: cidToUse,
+            gateway,
+          });
           return data;
         }
 
@@ -324,7 +311,6 @@ export async function getIPFSJSON<T>(cid: string): Promise<T> {
     } catch (error) {
       errors.push(error instanceof Error ? error : new Error(String(error)));
 
-      // Log and continue to next gateway
       if (gateway !== IPFS_GATEWAYS[IPFS_GATEWAYS.length - 1]) {
         logWarn(`Gateway ${gateway} failed, trying next gateway`, error);
         continue;
@@ -332,7 +318,6 @@ export async function getIPFSJSON<T>(cid: string): Promise<T> {
     }
   }
 
-  // All gateways failed
   logError("All IPFS gateways failed", errors[0], { cid: cidToUse });
   throw parseIPFSError(errors[0] || new Error("All IPFS gateways failed"));
 }
@@ -363,7 +348,6 @@ export async function getStepData(stepCID: string): Promise<StepData> {
  * @returns IPFS URI in format ipfs://Qm...
  */
 export async function uploadImage(file: File): Promise<string> {
-  // Validate image file
   if (!file.type.startsWith("image/")) {
     throw new IPFSError(
       "Invalid file type",
@@ -398,7 +382,6 @@ export function getImageUrl(ipfsURI: string): string {
     cidToUse = ipfsURI.replace("ipfs://", "");
   }
 
-  // Use primary gateway by default
   const { ipfsGateway } = getIPFSConfig();
   return `${ipfsGateway}${cidToUse}`;
 }
@@ -440,7 +423,6 @@ export async function createBatchMetadata(
   imageFile: File
 ): Promise<BatchMetadata> {
   try {
-    // Upload image first
     const imageURI = await uploadImage(imageFile);
 
     return {
@@ -561,7 +543,7 @@ export async function checkIPFSGateway(): Promise<boolean> {
           signal: controller.signal,
         });
         cleanupTimeoutAbortController(controller);
-        
+
         // 404 is expected for empty gateway, so that's OK
         return response.ok || response.status === 404;
       } finally {
@@ -615,7 +597,10 @@ export function formatIPFSError(error: unknown): string {
     if (error.message.includes("Failed to fetch")) {
       return "Network error - unable to connect to IPFS. Please check your connection.";
     }
-    if (error.message.includes("401") || error.message.includes("Unauthorized")) {
+    if (
+      error.message.includes("401") ||
+      error.message.includes("Unauthorized")
+    ) {
       return "Authentication failed - check your IPFS API key configuration.";
     }
     if (error.message.includes("413")) {

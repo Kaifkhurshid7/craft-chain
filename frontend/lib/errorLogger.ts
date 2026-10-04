@@ -39,7 +39,6 @@ class ErrorLogger {
   private externalServiceUrl?: string;
 
   constructor() {
-    // Initialize external service URL from environment if available
     this.externalServiceUrl = process.env.NEXT_PUBLIC_ERROR_LOG_SERVICE;
   }
 
@@ -57,7 +56,8 @@ class ErrorLogger {
       level,
       message,
       context,
-      userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+      userAgent:
+        typeof navigator !== "undefined" ? navigator.userAgent : undefined,
       url: typeof window !== "undefined" ? window.location.href : undefined,
     };
 
@@ -65,18 +65,15 @@ class ErrorLogger {
       entry.error = formatErrorForLogging(error);
     }
 
-    // Store in memory
     this.logs.push(entry);
     if (this.logs.length > this.maxLogsInMemory) {
       this.logs.shift();
     }
 
-    // Log to console in development
     if (this.isDevelopment) {
       this.logToConsole(entry);
     }
 
-    // Send to external service if critical
     if (level === LogLevel.CRITICAL) {
       this.sendToExternalService(entry).catch(() => {
         // Silently fail external service uploads
@@ -147,24 +144,41 @@ class ErrorLogger {
   /**
    * Log warning message
    */
-  warn(message: string, context?: Record<string, unknown>, error?: unknown): void {
+  warn(
+    message: string,
+    context?: Record<string, unknown>,
+    error?: unknown
+  ): void {
     this.log(LogLevel.WARN, message, context, error);
   }
 
   /**
    * Log error
    */
-  error(message: string, error: unknown, context?: Record<string, unknown>): void {
+  error(
+    message: string,
+    error: unknown,
+    context?: Record<string, unknown>
+  ): void {
     const userMessage = getUserMessage(error);
     const errorType = getErrorType(error);
 
-    this.log(LogLevel.ERROR, message, { userMessage, errorType, ...context }, error);
+    this.log(
+      LogLevel.ERROR,
+      message,
+      { userMessage, errorType, ...context },
+      error
+    );
   }
 
   /**
    * Log critical error
    */
-  critical(message: string, error: unknown, context?: Record<string, unknown>): void {
+  critical(
+    message: string,
+    error: unknown,
+    context?: Record<string, unknown>
+  ): void {
     const userMessage = getUserMessage(error);
     const errorType = getErrorType(error);
 
@@ -219,26 +233,39 @@ class ErrorLogger {
   }
 }
 
-// Create singleton instance
 export const errorLogger = new ErrorLogger();
 
 /**
  * Convenience functions
  */
 
-export function logDebug(message: string, context?: Record<string, unknown>): void {
+export function logDebug(
+  message: string,
+  context?: Record<string, unknown>
+): void {
   errorLogger.debug(message, context);
 }
 
-export function logInfo(message: string, context?: Record<string, unknown>): void {
+export function logInfo(
+  message: string,
+  context?: Record<string, unknown>
+): void {
   errorLogger.info(message, context);
 }
 
-export function logWarn(message: string, error?: unknown, context?: Record<string, unknown>): void {
+export function logWarn(
+  message: string,
+  error?: unknown,
+  context?: Record<string, unknown>
+): void {
   errorLogger.warn(message, context, error);
 }
 
-export function logError(message: string, error: unknown, context?: Record<string, unknown>): void {
+export function logError(
+  message: string,
+  error: unknown,
+  context?: Record<string, unknown>
+): void {
   errorLogger.error(message, error, context);
 }
 
