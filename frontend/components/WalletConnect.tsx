@@ -4,8 +4,15 @@ import { X } from "lucide-react";
 import { useWallet } from "@/context/WalletContext";
 
 export function WalletConnect() {
-  const { wallet, connect, disconnect, switchNetwork, isLoading, error, clearError } =
-    useWallet();
+  const {
+    wallet,
+    connect,
+    disconnect,
+    switchNetwork,
+    isLoading,
+    error,
+    clearError,
+  } = useWallet();
 
   if (wallet.isConnected && wallet.isCorrectNetwork) {
     return null;
@@ -18,22 +25,35 @@ export function WalletConnect() {
           {!wallet.isConnected ? (
             <>
               <p className="eyebrow mb-2">Wallet required</p>
-              <h3 className="mb-2 font-serif text-xl font-semibold">Connect your wallet</h3>
+              <h3 className="mb-2 font-serif text-xl font-semibold">
+                Connect your wallet
+              </h3>
               <p className="mb-4 text-sm text-ink/65">
-                Connect MetaMask to mint batches, record steps, and transfer ownership.
+                Connect MetaMask to mint batches, record steps, and transfer
+                ownership.
               </p>
-              <button onClick={connect} disabled={isLoading} className="btn-primary">
+              <button
+                onClick={connect}
+                disabled={isLoading}
+                className="btn-primary"
+              >
                 {isLoading ? "Connecting..." : "Connect MetaMask"}
               </button>
             </>
           ) : (
             <>
               <p className="eyebrow mb-2">Wrong network</p>
-              <h3 className="mb-2 font-serif text-xl font-semibold">Switch to Sepolia</h3>
+              <h3 className="mb-2 font-serif text-xl font-semibold">
+                Switch to Sepolia
+              </h3>
               <p className="mb-4 text-sm text-ink/65">
                 This application requires the Ethereum Sepolia testnet.
               </p>
-              <button onClick={switchNetwork} disabled={isLoading} className="btn-primary">
+              <button
+                onClick={switchNetwork}
+                disabled={isLoading}
+                className="btn-primary"
+              >
                 {isLoading ? "Switching..." : "Switch to Sepolia"}
               </button>
             </>
