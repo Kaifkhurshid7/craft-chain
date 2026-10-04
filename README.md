@@ -1,595 +1,439 @@
+<div align="center">
+
 # Craft-Chain
 
-## Blockchain-Based Craft Batch Traceability System
+**Blockchain-based traceability for handcrafted product batches**
 
-Craft-Chain is a decentralized application (DApp) that provides transparent and verifiable traceability for handcrafted product batches. Each batch is represented by a unique ERC-721 NFT on the Ethereum Sepolia testnet. Custody transfers and processing events are recorded on-chain, while large metadata and step details are stored on IPFS. This creates an immutable, cryptographically verified supply chain record accessible to all participants.
+Every batch is an ERC-721 token on Ethereum Sepolia. Its story lives on IPFS. Anyone can verify it.
+
+![Solidity](https://img.shields.io/badge/Solidity-0.8.24-363636?logo=solidity)
+![Hardhat](https://img.shields.io/badge/Hardhat-2.x-yellow)
+![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=nextdotjs)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Network](https://img.shields.io/badge/Network-Sepolia-627EEA?logo=ethereum&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+</div>
+
+---
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Features](#features)
+3. [How It Works](#how-it-works)
+4. [Technology Stack](#technology-stack)
+5. [Project Structure](#project-structure)
+6. [Smart Contract](#smart-contract)
+7. [Getting Started](#getting-started)
+8. [Usage](#usage)
+9. [Testing](#testing)
+10. [Deployment](#deployment)
+11. [Security](#security)
+12. [Project Status](#project-status)
+13. [Documentation](#documentation)
+14. [License](#license)
 
 ---
 
 ## Overview
 
-### What It Does
+Handcrafted supply chains usually keep their records in separate spreadsheets, emails and local databases. Buyers cannot independently check where a product came from, and the people who handled it cannot prove it.
 
-Craft-Chain enables participants in a craft supply chain to record and verify the complete history of a product batch:
+Craft-Chain gives each product batch a single public record:
 
-1. **Artisans** mint an ERC-721 NFT representing a batch of handcrafted products
-2. **Metadata** (images, descriptions, origin, materials) is uploaded to IPFS
-3. **Custody transfers** follow standard ERC-721 mechanisms as products move through the supply chain
-4. **Processing steps** are recorded on-chain with cryptographic verification of off-chain details
-5. **Buyers** can access the complete batch history through a QR code or token ID
-
-### Why It Exists
-
-Handcraft supply chains typically lack centralized, verifiable records. Participants maintain separate documentation, making it difficult to verify product origin or track custody changes. Craft-Chain addresses this by creating a single, immutable source of truth that all participants can independently verify.
-
-### Architecture
-
-The system uses a hybrid on-chain/off-chain approach:
-
-- **Blockchain**: Records ownership, custody transfers, and step hashes
-- **IPFS**: Stores batch metadata, images, and step details
-- **Smart Contract**: Manages minting, step recording, and role-based access control
-
-This approach minimizes blockchain costs while maintaining full verifiability through cryptographic hashing.
+- The batch is minted as an **ERC-721 token**, so it has a unique ID and one current owner.
+- Descriptive data (photo, origin, material, production date) is stored on **IPFS**.
+- Each journey step is recorded **on-chain** as a hash, with the actor's address and a timestamp.
+- Buyers open the batch page, or scan its **QR code**, to see the whole history. Every link goes to Etherscan, so nothing has to be taken on trust.
 
 ---
 
-## Problem Statement
+## Features
 
-### Current Supply Chain Challenges
-
-Handcrafted product supply chains face several traceability issues:
-
-- **Fragmented Records**: Information is scattered across spreadsheets, emails, and local databases
-- **Limited Transparency**: Participants outside the direct chain have no visibility into product history
-- **Difficult Verification**: No cryptographic proof of origin or processing steps
-- **Custody Ambiguity**: Difficult to establish who held the product and when
-- **Trust Gap**: Buyers cannot independently verify product authenticity or ethical sourcing claims
-
-### Impact
-
-These challenges result in:
-
-- Inability to authenticate handcrafted products
-- Loss of premium pricing for authenticated goods
-- Difficulty resolving disputes over product handling or quality
-- Missed opportunities for ethical supply chain marketing
+| Area | Capability |
+|---|---|
+| Batches | Mint batches as NFTs, restricted to accounts with `MINTER_ROLE` |
+| Storage | Metadata and images on IPFS through Pinata; the API key stays on the server |
+| Journey | Record steps on-chain, restricted to the current owner of the batch |
+| Custody | Standard ERC-721 transfers move ownership between participants |
+| Verification | Public batch page with chain of custody, owner, QR code and Etherscan links |
+| Discovery | Explorer with search and filters by origin, material and verification status |
+| Wallet | MetaMask connection with automatic Sepolia network detection |
+| Quality | 41 contract tests, TypeScript throughout, linted and formatted code |
 
 ---
 
-## Solution
+## How It Works
 
-### System Design
+### System architecture
 
-Craft-Chain records batch information across three layers:
+```mermaid
+flowchart LR
+    User([Artisan / Co-op / Buyer])
 
-```
-Batch Information
-├── On-Chain (Blockchain)
-│   ├── Token ID (unique identifier)
-│   ├── Owner address (current custodian)
-│   ├── Metadata URI (reference to IPFS)
-│   ├── Transfer events (ownership changes)
-│   └── Step hashes (cryptographic verification)
-│
-├── Off-Chain (IPFS)
-│   ├── Batch metadata JSON
-│   ├── Product images
-│   └── Processing step details
-│
-└── User Interface (Next.js Frontend)
-    ├── Wallet connection (MetaMask)
-    ├── Batch minting interface
-    ├── Step recording interface
-    └── Timeline visualization
-```
+    subgraph Browser["Next.js app"]
+        UI[Pages and components]
+        Eth[ethers.js + MetaMask]
+    end
 
-### Basic Workflow
+    subgraph Server["Next.js server routes"]
+        API["/api/ipfs/*"]
+    end
 
-```
-Artisan Creates Batch
-    ↓
-[Metadata → IPFS] + [NFT Metadata URI → Blockchain]
-    ↓
-Batch NFT Minted (Token ID assigned)
-    ↓
-Transfer to Co-op (Standard ERC-721 transfer)
-    ↓
-Co-op Records Steps
-    ↓
-[Step Details → IPFS] + [Step Hash → Blockchain]
-    ↓
-Transfer to Retailer
-    ↓
-Transfer to Buyer
-    ↓
-Buyer Verifies (QR Code → Batch Details Page → Complete History)
+    subgraph Chain["Ethereum Sepolia"]
+        SC[(CraftBatch721<br/>ERC-721 + AccessControl)]
+    end
+
+    IPFS[(IPFS via Pinata)]
+    RPC[Alchemy RPC]
+
+    User --> UI
+    UI --> Eth
+    Eth -- "sign and send" --> SC
+    UI -- "read only" --> RPC --> SC
+    UI -- "upload" --> API -- "server-only JWT" --> IPFS
+    UI -- "fetch metadata" --> IPFS
 ```
 
-### Data Verification
+### Where data lives
 
-For each step:
+| On-chain (smart contract) | Off-chain (IPFS) |
+|---|---|
+| Token ID | Batch name and description |
+| Current owner | Origin, material, production date |
+| Metadata URI (link to IPFS) | Product photo |
+| Step hash, actor and timestamp | |
 
-1. Original step JSON is created and uploaded to IPFS
-2. SHA-256 hash is calculated from the JSON
-3. Hash is recorded on-chain in the StepRecorded event
-4. Later, the IPFS data is retrieved and hash is recalculated
-5. If hashes match, the data is verified as authentic and unchanged
+Large and descriptive data stays on IPFS to keep gas costs low. The chain keeps only what must be tamper-proof.
 
----
+### Batch lifecycle
 
-## Key Features
+```mermaid
+flowchart TD
+    A[Artisan fills in the mint form] --> B[Photo and metadata uploaded to IPFS]
+    B --> C["mintBatch(to, ipfs://CID)"]
+    C --> D[Batch NFT created, token ID assigned]
+    D --> E{Current owner}
+    E -- "recordStep(tokenId, stepHash)" --> F[Step stored on-chain]
+    F --> E
+    E -- "transferFrom(...)" --> G[New owner]
+    G --> E
+    D --> H[QR code points to the batch page]
+    H --> I[Buyer scans and reads the full history]
+```
 
-### Implemented
+### Minting a batch
 
-- ERC-721 NFT standard for batch representation
-- Role-based access control (MINTER_ROLE for authorized batch creation)
-- IPFS integration for off-chain storage
-- Step recording with cryptographic hashing
-- Standard ERC-721 custody transfers
-- Batch timeline reconstruction from blockchain events
-- QR code generation and linking
-- MetaMask wallet integration
-- Ethereum Sepolia testnet support
+```mermaid
+sequenceDiagram
+    actor Artisan
+    participant App as Web app
+    participant API as /api/ipfs
+    participant IPFS as IPFS (Pinata)
+    participant MM as MetaMask
+    participant SC as CraftBatch721
 
-### Planned
+    Artisan->>App: Submit batch details and photo
+    App->>API: Upload photo
+    API->>IPFS: Pin file
+    IPFS-->>App: Image CID
+    App->>API: Upload metadata JSON
+    API->>IPFS: Pin file
+    IPFS-->>App: Metadata CID
+    App->>MM: mintBatch(owner, ipfs://CID)
+    MM->>SC: Signed transaction
+    SC-->>App: BatchMinted(tokenId)
+    App-->>Artisan: Token ID and transaction hash
+```
 
-- Batch modification with audit trail
-- Advanced supply chain analytics
-- Mobile application
-- Multi-chain support
+### Verifying a step
+
+```mermaid
+flowchart LR
+    S[Step details JSON] --> H["keccak256 hash"]
+    H --> R["recordStep(tokenId, hash)"]
+    R --> E[(StepRecorded event<br/>actor + timestamp)]
+    S -. "stored off-chain" .-> I[(IPFS)]
+    I -. "re-hash later" .-> C{Hashes match?}
+    E -. "on-chain hash" .-> C
+    C -- Yes --> OK[Data is authentic and unchanged]
+    C -- No --> BAD[Data was altered]
+```
+
+### Roles and permissions
+
+```mermaid
+flowchart TB
+    Admin[Admin<br/>contract deployer] -- "grantRole(MINTER_ROLE)" --> Minter[Minter]
+    Minter -- "mintBatch" --> Batch((Batch NFT))
+    Batch --> Owner[Current owner]
+    Owner -- "recordStep" --> Steps[Step history]
+    Owner -- "transfer" --> Owner2[New owner]
+    Anyone[Anyone] -. "read-only access" .-> Batch
+    Anyone -. "read-only access" .-> Steps
+```
 
 ---
 
 ## Technology Stack
 
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| Frontend | Next.js | 14.x |
-| UI Library | React | 18.x |
-| Language | TypeScript | 5.x |
-| Styling | Tailwind CSS | 3.x |
-| Smart Contract | Solidity | 0.8.x |
-| NFT Standard | ERC-721 | OpenZeppelin |
-| Contract Framework | Hardhat | 2.x |
-| Contracts Library | OpenZeppelin Contracts | 5.x |
-| Blockchain Integration | ethers.js | 6.x |
-| Wallet | MetaMask | - |
-| RPC Provider | Alchemy | - |
-| Decentralized Storage | IPFS | - |
-| Pinning Service | Pinata | - |
-| Deployment | Vercel | - |
-| Version Control | GitHub | - |
-
----
-
-## System Architecture
-
-```
-┌─────────────────────────────────────────┐
-│     Users (Artisan, Co-op, Buyer)       │
-└──────────────────┬──────────────────────┘
-                   │
-           ┌───────▼────────┐
-           │  Next.js DApp  │
-           │  TypeScript    │
-           └───────┬────────┘
-                   │
-        ┌──────────┴────────────┐
-        │                       │
-     ┌──▼──┐            ┌──────▼──────┐
-     │ IPFS│            │  ethers.js  │
-     └──┬──┘            │  MetaMask   │
-        │               └──────┬──────┘
-        │                      │
-   ┌────▼─────┐           ┌────▼──────────┐
-   │ Batch    │           │  Alchemy RPC  │
-   │ Metadata │           │  Sepolia      │
-   │ Images   │           └────┬──────────┘
-   │ Steps    │                │
-   └──────────┘         ┌──────▼───────────────┐
-                        │ Ethereum Sepolia    │
-                        ├─────────────────────┤
-                        │ CraftBatch721.sol   │
-                        │ - ERC-721 NFT       │
-                        │ - Minting           │
-                        │ - Step Recording    │
-                        │ - Transfers         │
-                        │ - Events            │
-                        └─────────────────────┘
-```
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS |
+| Wallet and chain access | ethers.js 6, MetaMask |
+| Smart contract | Solidity 0.8.24, OpenZeppelin Contracts 5 (ERC721URIStorage, ERC721Burnable, AccessControl) |
+| Contract tooling | Hardhat 2, TypeChain, solidity-coverage |
+| Storage | IPFS, pinned through Pinata |
+| RPC provider | Alchemy |
+| Hosting | Vercel (frontend), Sepolia testnet (contract) |
 
 ---
 
 ## Project Structure
 
-```
+```text
 craft-chain/
-├── blockchain/                          # Smart contract layer
+├── blockchain/                  Smart contract project
 │   ├── contracts/
-│   │   └── CraftBatch721.sol           # Main contract (ERC-721 + AccessControl)
-│   ├── scripts/
-│   │   └── deploy.ts                   # Deployment script
-│   ├── test/
-│   │   └── CraftBatch721.test.ts       # Test suite
-│   ├── ignition/
-│   │   └── modules/
-│   │       └── CraftBatch721.ts        # Ignition deployment module
-│   ├── hardhat.config.ts               # Hardhat configuration
-│   ├── tsconfig.json                   # TypeScript config
-│   └── package.json                    # Dependencies
+│   │   └── CraftBatch721.sol    ERC-721 + AccessControl contract
+│   ├── scripts/deploy.ts        Deployment script
+│   ├── test/                    Contract test suite (41 tests)
+│   └── hardhat.config.ts
 │
-├── frontend/                            # User interface layer
+├── frontend/                    Web application
 │   ├── app/
-│   │   ├── page.tsx                    # Dashboard
-│   │   ├── layout.tsx                  # Root layout
-│   │   ├── mint/
-│   │   │   └── page.tsx                # Batch minting interface
-│   │   ├── record-step/
-│   │   │   └── page.tsx                # Step recording interface
-│   │   └── batch/
-│   │       └── [tokenId]/
-│   │           └── page.tsx            # Batch details and timeline
-│   ├── components/
-│   │   ├── Navbar.tsx                  # Navigation bar
-│   │   ├── WalletConnect.tsx           # MetaMask connection
-│   │   ├── MintForm.tsx                # Batch minting form
-│   │   ├── StepForm.tsx                # Step recording form
-│   │   ├── BatchDetails.tsx            # Batch information display
-│   │   ├── Timeline.tsx                # Event timeline
-│   │   └── QRCode.tsx                  # QR code generation
-│   ├── lib/
-│   │   ├── contract.ts                 # Contract configuration and ABI
-│   │   ├── blockchain.ts               # ethers.js utilities
-│   │   └── ipfs.ts                     # IPFS integration
-│   ├── public/                         # Static assets
-│   └── package.json                    # Dependencies
+│   │   ├── page.tsx             Home
+│   │   ├── explorer/            Batch explorer
+│   │   ├── mint/                Mint a batch
+│   │   ├── record-step/         Record a journey step
+│   │   ├── batch/[tokenId]/     Batch detail page
+│   │   └── api/ipfs/            Server routes that talk to Pinata
+│   ├── components/              UI components
+│   ├── context/                 Wallet and contract providers
+│   ├── hooks/                   Form validation, transaction status, batch registry
+│   └── lib/                     Contract, blockchain, IPFS and error helpers
 │
-├── docs/
-│   ├── project-documentation.md        # Complete technical documentation
-│   ├── architecture/                   # Architecture diagrams
-│   └── screenshots/                    # UI screenshots
-│
-├── .gitignore                          # Git ignore rules
-├── LICENSE                             # Project license
-└── README.md                           # This file
+├── PROJECT_GUIDE.md             Step-by-step usage guide
+├── LICENSE
+└── README.md
 ```
 
 ---
 
-## Smart Contract Specification
+## Smart Contract
 
-### CraftBatch721.sol
+`CraftBatch721` is an ERC-721 contract with role-based access control.
 
-The main smart contract implementing ERC-721 NFT functionality with batch minting and step recording.
+| Function | Access | Purpose |
+|---|---|---|
+| `mintBatch(to, metadataURI)` | `MINTER_ROLE` | Create a new batch NFT |
+| `recordStep(tokenId, stepHash)` | Current token owner | Record a journey step |
+| `getBatchSteps(tokenId)` | Public | All steps of a batch |
+| `getStep(tokenId, index)` | Public | One step by index |
+| `getStepCount(tokenId)` | Public | Number of recorded steps |
+| `tokenURI(tokenId)` | Public | IPFS metadata link |
+| `ownerOf(tokenId)` | Public | Current owner |
+| `transferFrom`, `safeTransferFrom` | Owner or approved | Standard ERC-721 transfer |
+| `grantRole`, `revokeRole` | Admin | Manage who can mint |
 
-#### Key Components
+**Events**
 
-- **ERC-721 Implementation**: Non-fungible tokens via OpenZeppelin
-- **AccessControl**: Role-based permissions via OpenZeppelin
-- **MINTER_ROLE**: Restricts who can create new batches
+| Event | Fields |
+|---|---|
+| `BatchMinted` | `tokenId` (indexed), `to` (indexed), `metadataURI` |
+| `StepRecorded` | `tokenId` (indexed), `actor` (indexed), `stepHash` (indexed), `timestamp` |
+| `Transfer` | Inherited from ERC-721 |
 
-#### Main Functions
+Token IDs start at 1 and increase by one. The deployer receives only `DEFAULT_ADMIN_ROLE`, so the deployer must grant `MINTER_ROLE` to every account that should mint, itself included.
 
-| Function | Visibility | Access | Purpose |
-|----------|-----------|--------|---------|
-| `mintBatch(to, uri)` | Public | MINTER_ROLE | Mint new batch NFT |
-| `recordStep(tokenId, hash)` | Public | Token owner | Record processing step |
-| `transferFrom(from, to, id)` | Public | Owner/Approved | Transfer ownership |
-| `safeTransferFrom(from, to, id)` | Public | Owner/Approved | Safe transfer with validation |
-| `ownerOf(tokenId)` | View | Public | Get current owner |
-| `tokenURI(tokenId)` | View | Public | Get IPFS metadata URI |
+**Example metadata stored on IPFS**
 
-#### Events
-
-- **Transfer** (inherited from ERC-721): Emitted on ownership changes
-- **StepRecorded**: Emitted when a step is recorded
-  - `tokenId`: Batch identifier
-  - `actor`: Address recording the step
-  - `stepHash`: SHA-256 hash of step data
-  - `timestamp`: Block timestamp
-
----
-
-## Data Storage Architecture
-
-### On-Chain (Ethereum Sepolia)
-
-Information stored on blockchain:
-
-- Token ID (unique batch identifier)
-- Current owner address
-- Token metadata URI (points to IPFS)
-- Transfer events (ownership history)
-- Step hashes (verification data)
-- Actor addresses (who recorded each step)
-- Timestamps (when events occurred)
-
-**Why**: Immutability, decentralized verification, audit trail
-
-### Off-Chain (IPFS)
-
-Information stored on IPFS:
-
-- Batch metadata JSON (name, description, origin, material, production date)
-- Product images
-- Step details (description, location, date, processing information)
-
-**Example Batch Metadata**:
 ```json
 {
   "name": "Handwoven Cotton Shawl",
   "description": "Premium handcrafted cotton product",
-  "image": "ipfs://QmABC123...",
+  "image": "ipfs://<image-cid>",
   "attributes": [
-    {"trait_type": "Origin", "value": "Odisha, India"},
-    {"trait_type": "Material", "value": "100% Cotton"},
-    {"trait_type": "Production Date", "value": "2026-09-26"}
+    { "trait_type": "Origin", "value": "Odisha, India" },
+    { "trait_type": "Material", "value": "100% Cotton" },
+    { "trait_type": "Production Date", "value": "2026-09-26" }
   ]
 }
 ```
 
-**Why**: Cost-effective, supports large files, permanently archived with pinning service
-
 ---
 
-## Development
+## Getting Started
 
 ### Prerequisites
 
-- Node.js v18 or higher
-- npm or yarn
-- Git
+- Node.js 18 or newer and npm
 - MetaMask browser extension
-- Alchemy account (free tier sufficient)
-- Pinata account (free tier sufficient)
+- Alchemy account (Sepolia RPC URL)
+- Pinata account (API JWT)
+- Sepolia test ETH from a faucet
 
-### Setup
-
-#### 1. Clone Repository
+### 1. Clone and install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/craft-chain.git
+git clone https://github.com/<your-username>/craft-chain.git
 cd craft-chain
+
+cd blockchain && npm install
+cd ../frontend && npm install
 ```
 
-#### 2. Configure Blockchain
+### 2. Deploy the contract
+
+Create `blockchain/.env` from `blockchain/.env.example`:
+
+```env
+SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/<key>
+PRIVATE_KEY=<deployer private key>
+ETHERSCAN_API_KEY=<optional, for verification>
+```
 
 ```bash
 cd blockchain
-
-# Install dependencies
-npm install
-
-# Create environment file
-cat > .env << EOF
-SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_ALCHEMY_KEY
-PRIVATE_KEY=your_wallet_private_key
-EOF
-
-# Compile smart contract
-npx hardhat compile
-
-# Run tests
-npx hardhat test
-
-# Deploy to Sepolia
-npx hardhat run scripts/deploy.ts --network sepolia
+npm run compile
+npm test
+npm run deploy:sepolia
 ```
 
-Save the deployed contract address for the next step.
+Copy the printed contract address.
 
-#### 3. Configure Frontend
+### 3. Allow an account to mint
+
+The deployer is only the admin. Grant `MINTER_ROLE` to the wallet that will mint, with the Hardhat console or the "Write contract" tab on Etherscan:
+
+```text
+grantRole(MINTER_ROLE, <minter wallet address>)
+```
+
+### 4. Configure and run the frontend
+
+Create `frontend/.env.local` from `frontend/.env.example`:
+
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_CONTRACT_ADDRESS` | Address from step 2 |
+| `NEXT_PUBLIC_SEPOLIA_CHAIN_ID` | `11155111` |
+| `NEXT_PUBLIC_ALCHEMY_RPC_URL` | Your Sepolia RPC URL |
+| `NEXT_PUBLIC_IPFS_GATEWAY` | `https://gateway.pinata.cloud/ipfs/` |
+| `PINATA_JWT` | Pinata JWT. Server-only: do **not** add a `NEXT_PUBLIC_` prefix |
 
 ```bash
-cd ../frontend
-
-# Install dependencies
-npm install
-
-# Create environment file
-cat > .env.local << EOF
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x...deployed_address...
-NEXT_PUBLIC_SEPOLIA_CHAIN_ID=11155111
-NEXT_PUBLIC_IPFS_GATEWAY=https://gateway.pinata.cloud/ipfs/
-NEXT_PUBLIC_PINATA_JWT=your_pinata_jwt
-EOF
-
-# Start development server
+cd frontend
 npm run dev
 ```
 
-Visit `http://localhost:3000` and connect MetaMask to Sepolia network.
+Open <http://localhost:3000> and connect MetaMask on Sepolia.
 
 ---
 
 ## Usage
 
-### For Artisans: Mint a Batch
+| Page | URL | Wallet | What you do |
+|---|---|---|---|
+| Home | `/` | No | See live statistics and the newest batch |
+| Explorer | `/explorer` | No | Search and filter all batches |
+| Batch detail | `/batch/<id>` | No | Read the history, copy addresses, download the QR code |
+| Mint | `/mint` | Yes (minter) | Create a batch |
+| Record step | `/record-step` | Yes (owner) | Add a journey step |
 
-1. Connect wallet with MetaMask
-2. Navigate to "Mint Batch"
-3. Enter batch information (name, description, origin, material, production date)
-4. Upload product image
-5. Click "Mint"
-6. Approve transaction in MetaMask
-7. Receive token ID
+**Artisan:** open Mint, fill in the details and photo, confirm in MetaMask, then note the token ID.
 
-### For Participants: Record a Step
+**Current owner:** open Record Step, enter the token ID, choose the step type, add a description, location and date, then confirm.
 
-1. Connect wallet (must be current batch owner)
-2. Navigate to "Record Step"
-3. Enter token ID of the batch
-4. Select step type (Processing, Transportation, Quality Check, Packaging, Other)
-5. Enter description, location, and date/time
-6. Click "Record Step"
-7. Approve transaction in MetaMask
-8. Step is recorded on blockchain with cryptographic verification
+**Buyer:** scan the QR code on the product, or search the explorer, and review the owner, product details and every recorded step. Follow the Etherscan links to check them independently.
 
-### For Participants: Transfer Custody
-
-1. Connect wallet (must be current batch owner)
-2. Navigate to batch details page
-3. Click "Transfer Batch"
-4. Enter recipient wallet address
-5. Approve transaction in MetaMask
-6. Ownership transfers to recipient
-
-### For Buyers: Verify a Batch
-
-1. Scan QR code on product packaging
-2. Browser opens batch details page
-3. Review complete batch information:
-   - Origin and artisan details
-   - Product metadata and images
-   - All custody transfers (who held it and when)
-   - All processing and transportation steps
-   - Current owner
-4. Verify authenticity based on information
-
----
-
-## Security Considerations
-
-### Smart Contract
-
-- Role-based access control prevents unauthorized minting
-- Only current token owner can record steps
-- Standard ERC-721 transfer mechanisms prevent token theft
-- Cryptographic hashes verify data integrity without storing full data on-chain
-
-### Frontend
-
-- Private keys never stored in code or browser storage
-- MetaMask used for transaction signing
-- Environment variables for sensitive configuration
-- Input validation on all forms
-
-### Data Privacy
-
-- No personally identifiable information stored on blockchain (expected)
-- No sensitive business data on IPFS
-- All IPFS data is public (appropriate for supply chain transparency)
-- Batch metadata is limited to product information, not personal details
+For a step-by-step walkthrough, see [PROJECT_GUIDE.md](./PROJECT_GUIDE.md).
 
 ---
 
 ## Testing
 
-### Smart Contract Tests
-
 ```bash
 cd blockchain
-npx hardhat test
+npm test                  # run the contract tests
+npm run test:coverage     # coverage report
 ```
-
-### Test Coverage
 
 ```bash
-npx hardhat coverage
+cd frontend
+npm run type-check        # TypeScript
+npm run lint              # ESLint
+npm run build             # production build
 ```
-
-### Manual Testing Checklist
-
-- Wallet connection to Sepolia
-- Network detection (correct network alert)
-- Batch minting with all metadata
-- IPFS metadata upload and retrieval
-- Step recording with hash verification
-- Token transfer between accounts
-- Batch timeline reconstruction from events
-- QR code generation and functionality
-- Error handling for edge cases
-- Responsive design on mobile
 
 ---
 
 ## Deployment
 
-### Deploy Smart Contract to Sepolia
+**Contract:** `npm run deploy:sepolia` from `blockchain/`.
 
-```bash
-cd blockchain
-npx hardhat run scripts/deploy.ts --network sepolia
-```
+**Frontend (Vercel):**
 
-Output will include the deployed contract address. Save this for frontend configuration.
+1. Import the repository and set **Root Directory** to `frontend`. Leave the build settings at their defaults.
+2. Add the environment variables from [Getting Started](#4-configure-and-run-the-frontend).
+3. Deploy. The `/api/ipfs/*` routes run as serverless functions, so no separate backend is needed.
 
-### Deploy Frontend to Vercel
-
-```bash
-# Push code to GitHub
-git add .
-git commit -m "Production ready"
-git push origin main
-
-# Deploy via Vercel
-# 1. Visit https://vercel.com
-# 2. Import your GitHub repository
-# 3. Add environment variables (NEXT_PUBLIC_CONTRACT_ADDRESS, etc.)
-# 4. Click Deploy
-```
+Vercel's free plan limits request bodies to about 4.5 MB, so photos between 4.5 MB and 5 MB will fail to upload there.
 
 ---
 
-## Documentation
+## Security
 
-### Complete Technical Documentation
-
-See [`docs/project-documentation.md`](./docs/project-documentation.md) for:
-
-- Detailed system architecture
-- Smart contract specifications and function reference
-- Frontend component documentation
-- Deployment instructions
-- Troubleshooting guide
-- Future enhancement roadmap
+- Only accounts with `MINTER_ROLE` can mint, and only the current owner can record steps.
+- Transactions are signed in MetaMask. The app never handles a user's private key.
+- The Pinata key is read only by server routes. Anything with a `NEXT_PUBLIC_` prefix is visible to every visitor, so secrets must never use it.
+- `.env` files are git-ignored. Use a dedicated test wallet for deployment.
+- All IPFS data is public. Store only product information, never personal details.
+- This project targets a testnet and has not been audited for use with real value.
 
 ---
 
 ## Project Status
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Smart Contract | Design Complete | Ready for implementation |
-| Frontend Structure | Ready | Pages and components scaffolded |
-| IPFS Integration | Design Complete | Implementation pending |
-| Blockchain Configuration | Ready | Hardhat configured for Sepolia |
-| Documentation | Complete | Comprehensive technical documentation |
+| Component | Status |
+|---|---|
+| Smart contract | Implemented, deployed on Sepolia, 41 tests passing |
+| Frontend | Home, explorer, mint, record step and batch pages implemented |
+| IPFS integration | Implemented through server-side upload routes |
+| Production build | Passing |
 
-### Current Phase
+**Known limitations**
 
-Development - Smart contract and frontend implementation pending.
+- The batch page shows each step's on-chain data (actor, time, hash). The step's description and location are saved to IPFS but not yet linked back on-chain, so they are not displayed.
+- The explorer checks token IDs one after another, up to 120. A very large registry would need an event-based index.
+- There is no in-app page for transferring ownership. Transfers use standard ERC-721 tools.
+
+**Roadmap**
+
+- Link step details from IPFS to the batch timeline
+- Ownership transfer page
+- Event-based indexing for larger registries
+- Batch analytics and multi-chain support
+
+---
+
+## Documentation
+
+- [PROJECT_GUIDE.md](./PROJECT_GUIDE.md): usage and troubleshooting guide
 
 ---
 
 ## License
 
-This project is released under the MIT License. See the [LICENSE](./LICENSE) file for details.
-
----
-
-## Academic Use
-
-This project demonstrates:
-
-- ERC-721 non-fungible token implementation
-- Role-based access control in smart contracts
-- Blockchain-based supply chain traceability
-- Cryptographic verification of off-chain data
-- Integration of decentralized storage (IPFS) with blockchain
-- Web3 frontend development with ethers.js
-- Smart contract testing with Hardhat
-
-Suitable for courses in distributed systems, blockchain development, supply chain management, and Web3 application development.
+Released under the MIT License. See [LICENSE](./LICENSE).
 
 ---
 
 ## References
 
-- [OpenZeppelin ERC-721 Standard](https://docs.openzeppelin.com/contracts/4.x/erc721)
-- [Ethereum Sepolia Testnet](https://www.alchemy.com/list/ethereum/sepolia)
-- [IPFS Documentation](https://docs.ipfs.io/)
-- [ethers.js Documentation](https://docs.ethers.org/)
-- [Hardhat Documentation](https://hardhat.org/docs)
-- [MetaMask Developer Documentation](https://docs.metamask.io/)
+- [OpenZeppelin ERC-721](https://docs.openzeppelin.com/contracts/5.x/erc721)
+- [Hardhat](https://hardhat.org/docs)
+- [ethers.js](https://docs.ethers.org/v6/)
+- [IPFS](https://docs.ipfs.tech/)
+- [MetaMask](https://docs.metamask.io/)
