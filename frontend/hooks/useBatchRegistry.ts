@@ -25,7 +25,10 @@ function attribute(metadata: BatchMetadata | undefined, trait: string): string {
   return metadata?.attributes?.find((a) => a.trait_type === trait)?.value || "";
 }
 
-async function loadBatch(contract: Contract, tokenId: number): Promise<RegistryBatch | null> {
+async function loadBatch(
+  contract: Contract,
+  tokenId: number
+): Promise<RegistryBatch | null> {
   let owner: string;
   try {
     owner = await contract.ownerOf(tokenId);
@@ -35,7 +38,10 @@ async function loadBatch(contract: Contract, tokenId: number): Promise<RegistryB
   }
 
   const [stepCount, uri] = await Promise.all([
-    contract.getStepCount(tokenId).then(Number).catch(() => 0),
+    contract
+      .getStepCount(tokenId)
+      .then(Number)
+      .catch(() => 0),
     contract.tokenURI(tokenId).catch(() => ""),
   ]);
 
@@ -97,7 +103,9 @@ export function useBatchRegistry(): {
         const found: RegistryBatch[] = [];
         for (let start = 1; start <= MAX_TOKENS; start += CHUNK_SIZE) {
           const ids = Array.from({ length: CHUNK_SIZE }, (_, i) => start + i);
-          const chunk = await Promise.all(ids.map((id) => loadBatch(contract, id)));
+          const chunk = await Promise.all(
+            ids.map((id) => loadBatch(contract, id))
+          );
           const valid = chunk.filter((b): b is RegistryBatch => b !== null);
           if (cancelled) return;
           found.push(...valid);
@@ -106,7 +114,9 @@ export function useBatchRegistry(): {
         }
       } catch (err: unknown) {
         if (!cancelled) {
-          setError((err as { message?: string }).message || "Failed to load batches");
+          setError(
+            (err as { message?: string }).message || "Failed to load batches"
+          );
         }
       } finally {
         if (!cancelled) setIsLoading(false);

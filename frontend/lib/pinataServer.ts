@@ -13,7 +13,12 @@ export async function forwardToPinata(
   const jwt = process.env.PINATA_JWT;
   if (!jwt) {
     return NextResponse.json(
-      { error: { details: "IPFS upload is not configured. Set the PINATA_JWT environment variable." } },
+      {
+        error: {
+          details:
+            "IPFS upload is not configured. Set the PINATA_JWT environment variable.",
+        },
+      },
       { status: 500 }
     );
   }
@@ -30,9 +35,15 @@ export async function forwardToPinata(
     const text = await upstream.text();
     return new NextResponse(text, {
       status: upstream.status,
-      headers: { "Content-Type": upstream.headers.get("content-type") || "application/json" },
+      headers: {
+        "Content-Type":
+          upstream.headers.get("content-type") || "application/json",
+      },
     });
   } catch {
-    return NextResponse.json({ error: { details: "Could not reach the IPFS service." } }, { status: 502 });
+    return NextResponse.json(
+      { error: { details: "Could not reach the IPFS service." } },
+      { status: 502 }
+    );
   }
 }
