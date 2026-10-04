@@ -72,3 +72,9 @@ desktop.ini
 *.temp
 *.swp
 *.swo
+
+# ==============================
+# Docs
+# ==============================
+docs/
+DEPLOYMENT_GUIDE.md
