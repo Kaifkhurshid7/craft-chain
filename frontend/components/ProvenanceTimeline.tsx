@@ -21,8 +21,13 @@ export function ProvenanceTimeline({ events }: { events: ProvenanceEvent[] }) {
           {events.map((event, index) => {
             const isEven = index % 2 === 0;
             return (
-              <div key={event.id} className="relative flex flex-col items-center md:flex-row">
-                <div className={`flex w-full items-center ${isEven ? "md:flex-row-reverse" : ""}`}>
+              <div
+                key={event.id}
+                className="relative flex flex-col items-center md:flex-row"
+              >
+                <div
+                  className={`flex w-full items-center ${isEven ? "md:flex-row-reverse" : ""}`}
+                >
                   <div
                     className={`w-full pl-12 md:w-1/2 md:pl-0 ${
                       isEven ? "md:pl-12" : "text-right md:pr-12"
@@ -33,36 +38,53 @@ export function ProvenanceTimeline({ events }: { events: ProvenanceEvent[] }) {
                         event.status === "current" ? "ring-1 ring-forest" : ""
                       }`}
                     >
-                      <div className={`mb-2 flex items-center gap-3 ${!isEven ? "md:justify-end" : ""}`}>
+                      <div
+                        className={`mb-2 flex items-center gap-3 ${!isEven ? "md:justify-end" : ""}`}
+                      >
                         <span className="text-[10px] font-bold uppercase tracking-widest text-brass">
                           {event.date}
                         </span>
-                        {event.status === "completed" && <VerificationBadge size="sm" />}
+                        {event.status === "completed" && (
+                          <VerificationBadge size="sm" />
+                        )}
                       </div>
 
-                      <h4 className="mb-1 font-serif text-xl font-semibold">{event.type}</h4>
-                      <p className="mb-4 text-sm text-ink/60">{event.description}</p>
+                      <h4 className="mb-1 font-serif text-xl font-semibold">
+                        {event.type}
+                      </h4>
+                      <p className="mb-4 text-sm text-ink/60">
+                        {event.description}
+                      </p>
 
-                      <div className={`flex flex-col gap-1 text-xs text-ink/80 ${!isEven ? "md:items-end" : ""}`}>
+                      <div
+                        className={`flex flex-col gap-1 text-xs text-ink/80 ${!isEven ? "md:items-end" : ""}`}
+                      >
                         <div className="flex items-center gap-2">
-                          <span className="uppercase tracking-tighter text-ink/40">Actor</span>
+                          <span className="uppercase tracking-tighter text-ink/40">
+                            Actor
+                          </span>
                           <span className="font-medium">{event.actor}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="uppercase tracking-tighter text-ink/40">Location</span>
+                          <span className="uppercase tracking-tighter text-ink/40">
+                            Location
+                          </span>
                           <span className="font-medium">{event.location}</span>
                         </div>
                       </div>
 
                       {event.txHash && (
-                        <div className={`mt-4 flex border-t border-forest/5 pt-4 ${!isEven ? "md:justify-end" : ""}`}>
+                        <div
+                          className={`mt-4 flex border-t border-forest/5 pt-4 ${!isEven ? "md:justify-end" : ""}`}
+                        >
                           <a
                             href={`https://sepolia.etherscan.io/tx/${event.txHash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="font-mono text-[10px] text-forest hover:underline"
                           >
-                            TX: {event.txHash.slice(0, 10)}...{event.txHash.slice(-8)}
+                            TX: {event.txHash.slice(0, 10)}...
+                            {event.txHash.slice(-8)}
                           </a>
                         </div>
                       )}
