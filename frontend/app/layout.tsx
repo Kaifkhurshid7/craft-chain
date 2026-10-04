@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
 import { Providers } from "@/context/Providers";
 import "@/styles/globals.css";
@@ -17,7 +17,6 @@ export const metadata: Metadata = {
     "craft",
   ],
   authors: [{ name: "Craft-Chain Team" }],
-  viewport: "width=device-width, initial-scale=1",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -37,6 +36,11 @@ export const metadata: Metadata = {
 const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif" });
 const sans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export default function RootLayout({
   children,

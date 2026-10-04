@@ -13,7 +13,6 @@ import {
   WalletError,
   GasError,
   NetworkError,
-  ContractError,
   PermissionError,
   NotFoundError,
   ValidationError,

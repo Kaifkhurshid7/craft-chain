@@ -13,7 +13,7 @@ import { useFormValidation } from "@/hooks/useFormValidation";
 import { useTransactionStatus } from "@/hooks/useTransactionStatus";
 import { uploadStepData } from "@/lib/ipfs";
 import { hashStepData } from "@/lib/blockchain";
-import { RecordStepFormData, STEP_TYPES } from "@/types";
+import { RecordStepFormData, STEP_TYPES, StepData } from "@/types";
 
 export default function RecordStepPage() {
   const { wallet } = useWallet();
@@ -73,8 +73,8 @@ export default function RecordStepPage() {
 
     try {
       // Upload step data to IPFS
-      const stepDataResponse = await uploadStepData({
-        stepType: formData.stepType as any,
+      await uploadStepData({
+        stepType: formData.stepType as StepData["stepType"],
         description: formData.description,
         location: formData.location,
         date: formData.date,
