@@ -1,61 +1,56 @@
 import Link from "next/link";
 
-const ETHERSCAN = "https://sepolia.etherscan.io";
+const LINKS = [
+  { label: "Overview", href: "/" },
+  { label: "Mint Batch", href: "/mint" },
+  { label: "Record Step", href: "/record-step" },
+  { label: "Explore", href: "/explorer" },
+];
 
-export function Footer() {
-  const year = new Date().getFullYear();
-  const linkCls = "text-sm text-ink/70 transition-colors hover:text-ink";
-  const legalCls = "text-[10px] uppercase tracking-widest text-ink/40 hover:text-ink";
-
+export function Footer(): JSX.Element {
   return (
-    <footer className="border-t border-forest/10 bg-sand pb-10 pt-20">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-20 grid grid-cols-1 gap-12 md:grid-cols-4">
-          <div className="md:col-span-2">
-            <h2 className="mb-6 font-serif text-3xl font-bold tracking-tighter">CRAFT-CHAIN</h2>
-            <p className="max-w-sm leading-relaxed text-ink/60">
-              Bridging the gap between timeless craftsmanship and future-ready technology.
-              Verifying authenticity, one block at a time.
+    <footer className="border-t border-forest/15 bg-sand text-ink">
+      <div className="mx-auto max-w-7xl px-5 py-12 md:px-8 lg:px-10">
+        <div className="flex flex-col justify-between gap-10 lg:flex-row lg:items-start">
+          <div>
+            <Link href="/" className="inline-flex items-center gap-3" aria-label="Craft-Chain home">
+              <span className="grid h-9 w-9 place-items-center rounded-md border border-forest text-forest" aria-hidden="true">
+                <span className="h-3.5 w-3.5 rotate-45 border border-current" />
+              </span>
+              <span className="font-serif text-2xl font-bold tracking-[-0.03em]">CRAFT-CHAIN</span>
+            </Link>
+            <p className="mt-4 max-w-sm text-sm leading-6 text-ink/60">
+              Transparent provenance for handcrafted goods.
             </p>
           </div>
 
-          <div>
-            <h4 className="mb-6 font-sans text-[10px] font-black uppercase tracking-[0.2em] text-forest">
-              Platform
-            </h4>
-            <ul className="space-y-4">
-              <li><Link href="/explorer" className={linkCls}>Explorer</Link></li>
-              <li><Link href="/mint" className={linkCls}>Studio</Link></li>
-              <li><Link href="/record-step" className={linkCls}>Verify</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="mb-6 font-sans text-[10px] font-black uppercase tracking-[0.2em] text-forest">
-              Network Status
-            </h4>
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-forest" />
-                <span className="text-xs text-ink/70">Mainnet: Operational</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-brass" />
-                <span className="text-xs text-ink/70">Sepolia: Active (Default)</span>
-              </div>
-            </div>
-          </div>
+          <nav
+            aria-label="Footer navigation"
+            className="grid grid-cols-2 gap-x-8 gap-y-3 sm:flex sm:flex-wrap sm:justify-end"
+          >
+            {LINKS.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="text-xs font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:text-forest"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <a
+              href="https://sepolia.etherscan.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-semibold uppercase tracking-[0.16em] text-ink transition-colors hover:text-forest"
+            >
+              Etherscan
+            </a>
+          </nav>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-forest/5 pt-8 md:flex-row">
-          <div className="text-[10px] uppercase tracking-widest text-ink/40">
-            © {year} CRAFT-CHAIN DIGITAL PROVENANCE LTD.
-          </div>
-          <div className="flex gap-8">
-            <a href="#" className={legalCls}>Legal</a>
-            <a href={ETHERSCAN} target="_blank" rel="noopener noreferrer" className={legalCls}>Etherscan</a>
-            <a href="https://status.ipfs.io" target="_blank" rel="noopener noreferrer" className={legalCls}>IPFS Status</a>
-          </div>
+        <div className="mt-12 flex flex-col justify-between gap-3 border-t border-forest/15 pt-6 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/60 md:flex-row md:items-center">
+          <p>Craft-Chain · Built for verifiable craft traceability.</p>
+          <p>Ethereum Sepolia</p>
         </div>
       </div>
     </footer>

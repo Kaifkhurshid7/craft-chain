@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import QRCode from "qrcode";
+import { Download } from "lucide-react";
+
+const QR_COLORS = { dark: "#1F2421", light: "#F7F4EE" };
 
 interface QRCodeComponentProps {
   value: string;
@@ -15,7 +18,7 @@ export function QRCodeComponent({
   size = 256,
   level = "H",
   className = "",
-}: QRCodeComponentProps) {
+}: QRCodeComponentProps): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -27,10 +30,7 @@ export function QRCodeComponent({
           width: size,
           margin: 2,
           errorCorrectionLevel: level,
-          color: {
-            dark: "#1f2937",
-            light: "#ffffff",
-          },
+          color: QR_COLORS,
         },
         (error) => {
           if (error) {
@@ -42,14 +42,11 @@ export function QRCodeComponent({
   }, [value, size, level]);
 
   return (
-    <div className={`flex flex-col items-center gap-4 ${className}`}>
+    <div className={`flex flex-col items-center ${className}`}>
       <canvas
         ref={canvasRef}
-        className="border-2 border-gray-300 rounded-lg p-2 bg-white"
+        className="rounded-md border border-forest/15 bg-paper p-2"
       />
-      <p className="text-sm text-muted text-center">
-        Scan this QR code to view batch details
-      </p>
     </div>
   );
 }
@@ -62,17 +59,14 @@ export function QRCodeDownloadButton({
   value,
   size = 256,
   fileName = "batch-qr-code",
-}: QRCodeDownloadProps) {
-  const handleDownload = async () => {
+}: QRCodeDownloadProps): JSX.Element {
+  const handleDownload = async (): Promise<void> => {
     try {
       const dataUrl = await QRCode.toDataURL(value, {
         width: size,
         margin: 2,
         errorCorrectionLevel: "H",
-        color: {
-          dark: "#1f2937",
-          light: "#ffffff",
-        },
+        color: QR_COLORS,
       });
 
       const link = document.createElement("a");
@@ -89,9 +83,10 @@ export function QRCodeDownloadButton({
   return (
     <button
       onClick={handleDownload}
-      className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition font-medium text-sm"
+      className="inline-flex items-center justify-center gap-2 rounded-lg border border-forest/15 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-ink transition-colors hover:border-forest hover:text-forest"
     >
-      Download QR Code
+      <Download size={14} strokeWidth={1.7} aria-hidden="true" />
+      <span>Download QR Code</span>
     </button>
   );
 }
