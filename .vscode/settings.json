@@ -1,3 +1,8 @@
 {
-    "postman.settings.dotenv-detection-notification-visibility": false
+    "postman.settings.dotenv-detection-notification-visibility": false,
+    "solidity.packageDefaultDependenciesDirectory": "blockchain/node_modules",
+    "solidity.packageDefaultDependenciesContractsDirectory": "",
+    "solidity.remappings": [
+        "@openzeppelin/=blockchain/node_modules/@openzeppelin/"
+    ]
 }

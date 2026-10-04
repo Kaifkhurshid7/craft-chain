@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Navbar } from "@/components/Navbar";
+import { ArrowUpRight, FileImage, Hash, Upload } from "lucide-react";
+import { StudioLayout, FieldLabel, FieldError } from "@/components/studio/StudioLayout";
+import { TransactionPanel, SuccessCard } from "@/components/studio/TransactionPanel";
 import { WalletConnect } from "@/components/WalletConnect";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Alert } from "@/components/Alert";
@@ -159,230 +161,226 @@ export default function MintPage() {
     }
   };
 
-  return (
-    <>
-      <Navbar />
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
-        <div className="container max-w-2xl">
-          <h1 className="text-4xl font-bold mb-2">Mint Batch NFT</h1>
-          <p className="text-muted mb-8">Create a new batch NFT with product metadata</p>
+  const phase = status === "success" ? 3 : status === "pending" && uploadProgress >= 75 ? 1 : 0;
 
-          {!wallet.isConnected || !wallet.isCorrectNetwork ? (
-            <WalletConnect />
-          ) : (
-            <>
-              {status === "success" && tokenId ? (
-                <div className="space-y-4">
-                  <Alert
-                    type="success"
-                    title="Batch Minted Successfully"
-                    message={`Token ID: ${tokenId}\nTransaction: ${result.hash}`}
-                    dismissible={false}
-                  />
+  const resetAll = () => {
+    reset();
+    setSuggestedAction(null);
+    setFormData({
+      batchName: "",
+      description: "",
+      origin: "",
+      material: "",
+      productionDate: "",
+      image: null,
+    });
+    setLastMetadataURI(null);
+    setUploadProgress(0);
+  };
+
+  const busy = status === "pending" || contractLoading || isRetrying;
+
+  return (
+    <StudioLayout>
+      {!wallet.isConnected || !wallet.isCorrectNetwork ? (
+        <WalletConnect />
+      ) : (
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(300px,0.75fr)] lg:gap-16">
+          <div>
+            {status === "error" && (
+              <div className="mb-8 space-y-4">
+                <Alert
+                  type="error"
+                  title="Minting Failed"
+                  message={result.error || "Unknown error occurred"}
+                  dismissible={true}
+                  onDismiss={reset}
+                />
+                {suggestedAction && (
+                  <Alert type="info" title="Suggested Action" message={suggestedAction} dismissible={false} />
+                )}
+                <div className="flex gap-3">
                   <button
                     onClick={() => {
                       reset();
-                      setFormData({
-                        batchName: "",
-                        description: "",
-                        origin: "",
-                        material: "",
-                        productionDate: "",
-                        image: null,
-                      });
-                      setLastMetadataURI(null);
+                      setSuggestedAction(null);
                     }}
-                    className="w-full px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 transition"
+                    className="btn-outline flex-1"
                   >
-                    Mint Another Batch
+                    Clear &amp; Start Over
                   </button>
-                </div>
-              ) : status === "error" ? (
-                <div className="space-y-4">
-                  <Alert
-                    type="error"
-                    title="Minting Failed"
-                    message={result.error || "Unknown error occurred"}
-                    dismissible={true}
-                    onDismiss={reset}
-                  />
-                  {suggestedAction && (
-                    <Alert
-                      type="info"
-                      title="Suggested Action"
-                      message={suggestedAction}
-                      dismissible={false}
-                    />
-                  )}
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => {
-                        reset();
-                        setSuggestedAction(null);
-                      }}
-                      className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition"
-                    >
-                      Clear & Start Over
+                  {lastMetadataURI && (
+                    <button onClick={handleRetry} disabled={isRetrying} className="btn-primary flex-1">
+                      {isRetrying ? <LoadingSpinner size="sm" /> : "Retry Transaction"}
                     </button>
-                    {lastMetadataURI && (
-                      <button
-                        onClick={handleRetry}
-                        disabled={isRetrying}
-                        className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 disabled:opacity-50 transition"
-                      >
-                        {isRetrying ? <LoadingSpinner size="sm" /> : "Retry Transaction"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ) : null}
-
-              <div className="bg-white rounded-lg shadow-lg p-8 mt-6">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Batch Name */}
-                  <div>
-                    <label className="block font-semibold mb-2">Batch Name *</label>
-                    <input
-                      type="text"
-                      name="batchName"
-                      value={formData.batchName}
-                      onChange={handleInputChange}
-                      placeholder="e.g., Handwoven Cotton Shawl"
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none ${
-                        errors.batchName ? "border-error" : "border-gray-300 focus:border-primary"
-                      }`}
-                    />
-                    {errors.batchName && <p className="text-error text-sm mt-1">{errors.batchName}</p>}
-                  </div>
-
-                  {/* Description */}
-                  <div>
-                    <label className="block font-semibold mb-2">Description *</label>
-                    <textarea
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      placeholder="Describe the batch and its characteristics (min 10 characters)"
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none min-h-24 ${
-                        errors.description ? "border-error" : "border-gray-300 focus:border-primary"
-                      }`}
-                    ></textarea>
-                    {errors.description && <p className="text-error text-sm mt-1">{errors.description}</p>}
-                  </div>
-
-                  {/* Origin and Material */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block font-semibold mb-2">Origin *</label>
-                      <input
-                        type="text"
-                        name="origin"
-                        value={formData.origin}
-                        onChange={handleInputChange}
-                        placeholder="e.g., Odisha, India"
-                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none ${
-                          errors.origin ? "border-error" : "border-gray-300 focus:border-primary"
-                        }`}
-                      />
-                      {errors.origin && <p className="text-error text-sm mt-1">{errors.origin}</p>}
-                    </div>
-                    <div>
-                      <label className="block font-semibold mb-2">Material *</label>
-                      <input
-                        type="text"
-                        name="material"
-                        value={formData.material}
-                        onChange={handleInputChange}
-                        placeholder="e.g., 100% Cotton"
-                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none ${
-                          errors.material ? "border-error" : "border-gray-300 focus:border-primary"
-                        }`}
-                      />
-                      {errors.material && <p className="text-error text-sm mt-1">{errors.material}</p>}
-                    </div>
-                  </div>
-
-                  {/* Production Date */}
-                  <div>
-                    <label className="block font-semibold mb-2">Production Date *</label>
-                    <input
-                      type="date"
-                      name="productionDate"
-                      value={formData.productionDate}
-                      onChange={handleInputChange}
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none ${
-                        errors.productionDate ? "border-error" : "border-gray-300 focus:border-primary"
-                      }`}
-                    />
-                    {errors.productionDate && <p className="text-error text-sm mt-1">{errors.productionDate}</p>}
-                  </div>
-
-                  {/* Image Upload */}
-                  <div>
-                    <label className="block font-semibold mb-2">Product Image *</label>
-                    <div className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                      errors.image ? "border-error" : "border-gray-300"
-                    }`}>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                        id="image-input"
-                      />
-                      <label htmlFor="image-input" className="cursor-pointer">
-                        {formData.image ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <span>✓</span>
-                            <span>{formData.image.name}</span>
-                          </div>
-                        ) : (
-                          <div>
-                            <p className="text-gray-600">Click to upload image</p>
-                            <p className="text-sm text-muted">JPEG, PNG, GIF, or WebP (Max 5MB)</p>
-                          </div>
-                        )}
-                      </label>
-                    </div>
-                    {errors.image && <p className="text-error text-sm mt-1">{errors.image}</p>}
-                  </div>
-
-                  {/* Progress Bar */}
-                  {status === "pending" && uploadProgress > 0 && (
-                    <div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-primary h-2 rounded-full transition-all"
-                          style={{ width: `${uploadProgress}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-sm text-muted mt-2">
-                        {uploadProgress}% - {uploadProgress < 50 ? "Uploading to IPFS..." : "Minting NFT..."}
-                      </p>
-                    </div>
                   )}
-
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={status === "pending" || contractLoading || isRetrying}
-                    className="w-full px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 disabled:opacity-50 transition flex items-center justify-center gap-2"
-                  >
-                    {status === "pending" || isRetrying ? (
-                      <>
-                        <LoadingSpinner size="sm" />
-                        {isRetrying ? "Retrying..." : "Processing..."}
-                      </>
-                    ) : (
-                      "Mint Batch"
-                    )}
-                  </button>
-                </form>
+                </div>
               </div>
-            </>
-          )}
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-8" aria-label="Mint a new batch">
+              <div className="grid gap-8 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <FieldLabel>Batch Name</FieldLabel>
+                  <input
+                    type="text"
+                    name="batchName"
+                    value={formData.batchName}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Winter 2025 / Hand-thrown stoneware"
+                    className={`field ${errors.batchName ? "field-error" : ""}`}
+                  />
+                  <FieldError message={errors.batchName} />
+                </div>
+
+                <div className="md:col-span-2">
+                  <FieldLabel>Description</FieldLabel>
+                  <textarea
+                    name="description"
+                    rows={3}
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Tell the story of this batch (min 10 characters)..."
+                    className={`field resize-none ${errors.description ? "field-error" : ""}`}
+                  />
+                  <FieldError message={errors.description} />
+                </div>
+
+                <div>
+                  <FieldLabel>Origin</FieldLabel>
+                  <input
+                    type="text"
+                    name="origin"
+                    value={formData.origin}
+                    onChange={handleInputChange}
+                    placeholder="Region or workshop"
+                    className={`field ${errors.origin ? "field-error" : ""}`}
+                  />
+                  <FieldError message={errors.origin} />
+                </div>
+
+                <div>
+                  <FieldLabel>Material</FieldLabel>
+                  <input
+                    type="text"
+                    name="material"
+                    value={formData.material}
+                    onChange={handleInputChange}
+                    placeholder="Primary material"
+                    className={`field ${errors.material ? "field-error" : ""}`}
+                  />
+                  <FieldError message={errors.material} />
+                </div>
+
+                <div>
+                  <FieldLabel>Production Date</FieldLabel>
+                  <input
+                    type="date"
+                    name="productionDate"
+                    value={formData.productionDate}
+                    onChange={handleInputChange}
+                    className={`field ${errors.productionDate ? "field-error" : ""}`}
+                  />
+                  <FieldError message={errors.productionDate} />
+                </div>
+
+                <div>
+                  <FieldLabel>Image Upload</FieldLabel>
+                  <label
+                    htmlFor="image-input"
+                    className={`mb-0 flex cursor-pointer items-center gap-3 border-b py-3 text-sm font-normal normal-case tracking-normal text-ink/60 hover:text-forest ${
+                      errors.image ? "border-danger" : "border-forest/20"
+                    }`}
+                  >
+                    <Upload size={16} />
+                    <span>{formData.image?.name || "Choose a provenance image"}</span>
+                  </label>
+                  <input
+                    id="image-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="sr-only"
+                  />
+                  <p className="mt-1 text-xs text-ink/50">JPEG, PNG, GIF or WebP, max 5MB</p>
+                  <FieldError message={errors.image} />
+                </div>
+              </div>
+
+              {status === "pending" && uploadProgress > 0 && (
+                <div>
+                  <div className="h-1 w-full bg-forest/10">
+                    <div className="h-1 bg-forest transition-all" style={{ width: `${uploadProgress}%` }} />
+                  </div>
+                  <p className="mt-2 text-sm text-ink/60">
+                    {uploadProgress}% - {uploadProgress < 75 ? "Uploading to IPFS..." : "Minting NFT..."}
+                  </p>
+                </div>
+              )}
+
+              <button type="submit" disabled={busy} className="btn-primary">
+                {status === "pending" || isRetrying ? (
+                  <>
+                    <LoadingSpinner size="sm" />
+                    {isRetrying ? "Retrying..." : "Processing..."}
+                  </>
+                ) : (
+                  <>
+                    Mint Batch <ArrowUpRight size={16} />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          <div className="space-y-8">
+            <div className="border border-forest/15 bg-white/60 p-6 md:p-7">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <p className="eyebrow">Metadata</p>
+                  <h2 className="mt-2 text-2xl">IPFS Preview</h2>
+                </div>
+                <FileImage size={20} strokeWidth={1.5} className="text-forest" />
+              </div>
+              <dl className="space-y-4 border-t border-forest/15 pt-5 text-sm">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-ink/60">Name</dt>
+                  <dd className="text-right font-medium">{formData.batchName || "Untitled batch"}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-ink/60">Origin</dt>
+                  <dd className="text-right font-medium">{formData.origin || "Awaiting input"}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-ink/60">Image</dt>
+                  <dd className="break-all text-right font-medium">{formData.image?.name || "Not attached"}</dd>
+                </div>
+              </dl>
+              <div className="mt-6 flex items-center gap-2 border-t border-forest/15 pt-4 text-xs text-ink/60">
+                <Hash size={14} className="text-brass" />
+                <span>Stored on IPFS after minting</span>
+              </div>
+            </div>
+
+            <TransactionPanel phase={phase} failed={status === "error"} />
+
+            {status === "success" && tokenId && (
+              <>
+                <SuccessCard
+                  title="Batch ready to trace"
+                  rows={[
+                    { label: "New Token ID", value: `#${tokenId}` },
+                    { label: "Transaction Hash", value: result.hash || "" },
+                  ]}
+                />
+                <button onClick={resetAll} className="btn-outline w-full">
+                  Mint Another Batch
+                </button>
+              </>
+            )}
+          </div>
         </div>
-      </main>
-    </>
+      )}
+    </StudioLayout>
   );
 }

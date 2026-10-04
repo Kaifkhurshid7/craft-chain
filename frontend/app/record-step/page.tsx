@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Navbar } from "@/components/Navbar";
+import { ArrowUpRight, ChevronDown, MapPin } from "lucide-react";
+import { StudioLayout, FieldLabel, FieldError } from "@/components/studio/StudioLayout";
+import { TransactionPanel, SuccessCard } from "@/components/studio/TransactionPanel";
 import { WalletConnect } from "@/components/WalletConnect";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Alert } from "@/components/Alert";
@@ -105,27 +107,18 @@ export default function RecordStepPage() {
     }
   };
 
-  return (
-    <>
-      <Navbar />
-      <main className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-12">
-        <div className="container max-w-2xl">
-          <h1 className="text-4xl font-bold mb-2">Record Processing Step</h1>
-          <p className="text-muted mb-8">Document supply chain events and transitions</p>
+  const phase = status === "success" ? 3 : status === "pending" ? 1 : 0;
+  const busy = status === "pending" || contractLoading;
 
-          {!wallet.isConnected || !wallet.isCorrectNetwork ? (
-            <WalletConnect />
-          ) : (
-            <>
-              {status === "success" ? (
-                <Alert
-                  type="success"
-                  title="Step Recorded Successfully"
-                  message={`Transaction: ${result.hash?.slice(0, 10)}...`}
-                  dismissible={true}
-                  onDismiss={reset}
-                />
-              ) : status === "error" ? (
+  return (
+    <StudioLayout>
+      {!wallet.isConnected || !wallet.isCorrectNetwork ? (
+        <WalletConnect />
+      ) : (
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(300px,0.75fr)] lg:gap-16">
+          <div>
+            {status === "error" && (
+              <div className="mb-8">
                 <Alert
                   type="error"
                   title="Recording Failed"
@@ -133,33 +126,33 @@ export default function RecordStepPage() {
                   dismissible={true}
                   onDismiss={reset}
                 />
-              ) : null}
+              </div>
+            )}
 
-              <div className="bg-white rounded-lg shadow-lg p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Token ID */}
-                  <div>
-                    <label className="block font-semibold mb-2">Batch Token ID</label>
-                    <input
-                      type="number"
-                      name="tokenId"
-                      value={formData.tokenId || ""}
-                      onChange={handleInputChange}
-                      placeholder="Enter token ID"
-                      min="1"
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"
-                    />
-                    {errors.tokenId && <p className="text-error text-sm mt-1">{errors.tokenId}</p>}
-                  </div>
+            <form onSubmit={handleSubmit} className="space-y-8" aria-label="Record a journey step">
+              <div className="grid gap-8 md:grid-cols-2">
+                <div>
+                  <FieldLabel>Token ID</FieldLabel>
+                  <input
+                    type="number"
+                    name="tokenId"
+                    value={formData.tokenId || ""}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 1"
+                    min="1"
+                    className={`field font-mono ${errors.tokenId ? "field-error" : ""}`}
+                  />
+                  <FieldError message={errors.tokenId} />
+                </div>
 
-                  {/* Step Type */}
-                  <div>
-                    <label className="block font-semibold mb-2">Step Type</label>
+                <div>
+                  <FieldLabel>Step Type</FieldLabel>
+                  <div className="relative">
                     <select
                       name="stepType"
                       value={formData.stepType}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"
+                      className="field appearance-none"
                     >
                       {STEP_TYPES.map((type) => (
                         <option key={type} value={type}>
@@ -167,62 +160,75 @@ export default function RecordStepPage() {
                         </option>
                       ))}
                     </select>
+                    <ChevronDown size={17} className="pointer-events-none absolute right-0 top-4 text-forest" />
                   </div>
+                </div>
 
-                  {/* Description */}
-                  <div>
-                    <label className="block font-semibold mb-2">Description</label>
-                    <textarea
-                      name="description"
-                      value={formData.description}
+                <div className="md:col-span-2">
+                  <FieldLabel>Description</FieldLabel>
+                  <textarea
+                    name="description"
+                    rows={4}
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Describe what happened to this batch..."
+                    className={`field resize-none ${errors.description ? "field-error" : ""}`}
+                  />
+                  <FieldError message={errors.description} />
+                </div>
+
+                <div>
+                  <FieldLabel>Location</FieldLabel>
+                  <div className="relative">
+                    <MapPin size={16} className="pointer-events-none absolute left-0 top-4 text-forest" />
+                    <input
+                      type="text"
+                      name="location"
+                      value={formData.location}
                       onChange={handleInputChange}
-                      placeholder="Describe what happened in this step"
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary min-h-24"
-                    ></textarea>
-                    {errors.description && <p className="text-error text-sm mt-1">{errors.description}</p>}
+                      placeholder="City, country or facility"
+                      className={`field pl-7 ${errors.location ? "field-error" : ""}`}
+                    />
                   </div>
+                  <FieldError message={errors.location} />
+                </div>
 
-                  {/* Location and Date */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block font-semibold mb-2">Location</label>
-                      <input
-                        type="text"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        placeholder="Where did this occur?"
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"
-                      />
-                      {errors.location && <p className="text-error text-sm mt-1">{errors.location}</p>}
-                    </div>
-                    <div>
-                      <label className="block font-semibold mb-2">Date</label>
-                      <input
-                        type="datetime-local"
-                        name="date"
-                        value={formData.date}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"
-                      />
-                      {errors.date && <p className="text-error text-sm mt-1">{errors.date}</p>}
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={status === "pending" || contractLoading}
-                    className="w-full px-6 py-3 bg-secondary text-white rounded-lg font-semibold hover:bg-green-600 disabled:opacity-50 transition"
-                  >
-                    {status === "pending" ? <LoadingSpinner size="sm" /> : "Record Step"}
-                  </button>
-                </form>
+                <div>
+                  <FieldLabel>Date</FieldLabel>
+                  <input
+                    type="datetime-local"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleInputChange}
+                    className={`field ${errors.date ? "field-error" : ""}`}
+                  />
+                  <FieldError message={errors.date} />
+                </div>
               </div>
-            </>
-          )}
+
+              <button type="submit" disabled={busy} className="btn-primary">
+                {status === "pending" ? (
+                  <LoadingSpinner size="sm" />
+                ) : (
+                  <>
+                    Record Journey Step <ArrowUpRight size={16} />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          <div className="space-y-8">
+            <TransactionPanel phase={phase} failed={status === "error"} />
+            {status === "success" && (
+              <SuccessCard
+                title="Journey step recorded"
+                rows={[{ label: "Transaction Hash", value: result.hash || "" }]}
+              />
+            )}
+          </div>
         </div>
-      </main>
-    </>
+      )}
+    </StudioLayout>
   );
 }

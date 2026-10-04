@@ -13,7 +13,7 @@
       "extends": ["plugin:@typescript-eslint/recommended"],
       "rules": {
         "@typescript-eslint/no-explicit-any": "error",
-        "@typescript-eslint/explicit-function-return-types": "warn"
+        "@typescript-eslint/explicit-function-return-type": "warn"
       }
     }
   ]

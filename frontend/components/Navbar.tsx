@@ -1,81 +1,85 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useWallet } from "@/context/WalletContext";
 import { formatAddress } from "@/lib/contract";
+import { WalletModal } from "./WalletModal";
+
+const LINKS = [
+  { href: "/", label: "Overview" },
+  { href: "/explorer", label: "Explorer" },
+  { href: "/mint", label: "Studio" },
+  { href: "/#process", label: "Process" },
+];
 
 export function Navbar() {
-  const { wallet, connect, disconnect, isLoading } = useWallet();
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const { wallet } = useWallet();
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
-      <div className="container py-4">
-        <div className="flex justify-between items-center">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-primary">⛓️</span>
-            <div>
-              <h1 className="text-lg font-bold text-dark">Craft-Chain</h1>
-              <p className="text-xs text-muted">Batch Traceability</p>
+    <nav className="sticky top-0 z-40 border-b border-forest/5 bg-paper/80 backdrop-blur-md">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
+        <Link href="/" className="flex flex-col">
+          <span className="font-serif text-2xl font-bold leading-none tracking-tight text-ink">
+            CRAFT-CHAIN
+          </span>
+          <span className="mt-1 text-[8px] font-black uppercase tracking-[0.4em] text-brass">
+            Digital Provenance
+          </span>
+        </Link>
+
+        <div className="hidden items-center gap-12 md:flex">
+          {LINKS.map((l) => (
+            <Link
+              key={l.label}
+              href={l.href}
+              className={`text-xs font-bold uppercase tracking-widest transition-colors hover:text-forest ${
+                pathname === l.href ? "text-forest" : "text-ink"
+              }`}
+            >
+              {l.label}
+            </Link>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-6">
+          {wallet.isConnected && (
+            <div className="hidden items-center gap-2 rounded-full bg-sand px-3 py-1 lg:flex">
+              <div
+                className={`h-2 w-2 rounded-full ${
+                  wallet.isCorrectNetwork ? "bg-forest" : "bg-red-500"
+                }`}
+              />
+              <span className="font-mono text-[10px] uppercase text-ink">
+                {wallet.isCorrectNetwork ? "Sepolia" : "Wrong Network"}
+              </span>
             </div>
-          </Link>
+          )}
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-6">
-            <Link
-              href="/mint"
-              className="text-muted hover:text-primary transition"
-            >
-              Mint Batch
-            </Link>
-            <Link
-              href="/record-step"
-              className="text-muted hover:text-primary transition"
-            >
-              Record Step
-            </Link>
-            <a
-              href="#"
-              className="text-muted hover:text-primary transition"
-            >
-              Docs
-            </a>
-          </div>
-
-          {/* Wallet Connection */}
-          <div className="flex items-center gap-3">
+          <button
+            onClick={() => setOpen(true)}
+            className={`flex items-center gap-3 rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-widest transition-all ${
+              wallet.isConnected
+                ? "bg-ink text-paper hover:bg-ink/90"
+                : "border-2 border-ink text-ink hover:bg-ink hover:text-paper"
+            }`}
+          >
             {wallet.isConnected ? (
-              <div className="flex items-center gap-2">
-                {!wallet.isCorrectNetwork && (
-                  <span className="text-xs bg-warning text-white px-2 py-1 rounded">
-                    Wrong Network
-                  </span>
-                )}
-                <div className="text-right text-sm">
-                  <p className="font-semibold">{formatAddress(wallet.address || "")}</p>
-                  <p className={`text-xs ${wallet.isCorrectNetwork ? "text-success" : "text-warning"}`}>
-                    {wallet.isCorrectNetwork ? "Sepolia" : "Wrong Network"}
-                  </p>
-                </div>
-                <button
-                  onClick={disconnect}
-                  className="px-3 py-1 text-sm bg-gray-200 text-dark rounded hover:bg-gray-300 transition"
-                >
-                  Disconnect
-                </button>
-              </div>
+              <>
+                <span className="h-2 w-2 rounded-full bg-green-400" />
+                {formatAddress(wallet.address || "")}
+              </>
             ) : (
-              <button
-                onClick={connect}
-                disabled={isLoading}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition text-sm font-medium"
-              >
-                {isLoading ? "Connecting..." : "Connect Wallet"}
-              </button>
+              "Connect Wallet"
             )}
-          </div>
+          </button>
         </div>
       </div>
+
+      <WalletModal isOpen={open} onClose={() => setOpen(false)} />
     </nav>
   );
 }
