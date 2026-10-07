@@ -256,7 +256,7 @@ export default function ExplorerPage(): JSX.Element {
 
           {isLoading && (
             <div className="flex items-center justify-center gap-3 py-14 text-sm text-ink/60">
-              <LoadingSpinner size="sm" />
+              <LoadingSpinner size="sm" inline />
               <span>Reading batches from Sepolia...</span>
             </div>
           )}

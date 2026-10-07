@@ -251,7 +251,7 @@ export default function MintPage() {
                       className="btn-primary flex-1"
                     >
                       {isRetrying ? (
-                        <LoadingSpinner size="sm" />
+                        <LoadingSpinner size="sm" inline />
                       ) : (
                         "Retry Transaction"
                       )}
@@ -378,7 +378,7 @@ export default function MintPage() {
               <button type="submit" disabled={busy} className="btn-primary">
                 {status === "pending" || isRetrying ? (
                   <>
-                    <LoadingSpinner size="sm" />
+                    <LoadingSpinner size="sm" inline />
                     {isRetrying ? "Retrying..." : "Processing..."}
                   </>
                 ) : (
