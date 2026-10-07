@@ -233,7 +233,10 @@ export default function RecordStepPage() {
 
               <button type="submit" disabled={busy} className="btn-primary">
                 {status === "pending" ? (
-                  <LoadingSpinner size="sm" />
+                  <>
+                    <LoadingSpinner size="sm" inline />
+                    Recording...
+                  </>
                 ) : (
                   <>
                     Record Journey Step <ArrowUpRight size={16} />

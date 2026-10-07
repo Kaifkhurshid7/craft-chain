@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useWallet } from "@/context/WalletContext";
 
@@ -8,13 +9,17 @@ interface WalletModalProps {
   onClose: () => void;
 }
 
-export function WalletModal({ isOpen, onClose }: WalletModalProps) {
+export function WalletModal({
+  isOpen,
+  onClose,
+}: WalletModalProps): JSX.Element | null {
   const { wallet, connect, disconnect, switchNetwork, isLoading, error } =
     useWallet();
 
   if (!isOpen) return null;
 
-  return (
+  // Portal to <body>: the navbar's backdrop blur would otherwise trap the fixed overlay inside it
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 backdrop-blur-sm">
       <div className="w-full max-w-md border border-forest/10 bg-paper p-8 shadow-2xl">
         <div className="mb-6 flex items-center justify-between">
@@ -54,7 +59,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
               <div className="mb-1 text-[10px] uppercase tracking-widest text-ink/50">
                 Connected Address
               </div>
-              <div className="break-all font-mono text-sm">
+              <div className="break-all font-mono text-xs">
                 {wallet.address}
               </div>
             </div>
@@ -102,6 +107,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
